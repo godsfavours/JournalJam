@@ -1,4 +1,4 @@
-# Practice Task App
+# Practice Todo App
 
 This is a mini project to get ourselves acquianted with building a web app with a React frontend and Django backend. 
 

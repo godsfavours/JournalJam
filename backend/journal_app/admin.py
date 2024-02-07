@@ -8,4 +8,3 @@ class JournalAdmin(admin.ModelAdmin):
 
 admin.site.register(Journal, JournalAdmin)
 
-# Register your models here.

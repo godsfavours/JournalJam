@@ -16,16 +16,9 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from rest_framework import routers
-from journal_app import views
-
-router = routers.DefaultRouter()
-# Router specifically only works on ModelViewSet classes.
-router.register(r'journals', views.JournalView, 'journal')
 
 urlpatterns = [
     path("admin/", admin.site.urls),
-    path('api/', include(router.urls)),
     # If the url has no prefix, then go to 'journal_app.urls' directory and get url patterns from there.
     path('', include('journal_app.urls'))
 ]

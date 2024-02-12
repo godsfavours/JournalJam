@@ -1,0 +1,47 @@
+<!-- {% if request.user.is_authenticated %}
+  <p>{{ request.user.username }}</p>
+  <a href="{% url 'logout' %}">Logout</a>
+{% endif %}
+{% block content %}
+  <h2>Journal Entries</h2>
+
+  <form method="post" action="{% url 'journal_entries' %}">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Add Entry</button>
+  </form>
+
+  <h3>Previous Entries</h3>
+  <ul>
+    {% for entry in entries %}
+      <li>{{ entry.title }} - {{ entry.created_at }}</li>
+      <p>{{ entry.content }}</p>
+    {% endfor %}
+  </ul>
+{% endblock %} -->
+
+{% if request.user.is_authenticated %}
+  <p>{{ request.user.username }}</p>
+  <a href="{% url 'logout' %}">Logout</a>
+{% endif %}
+
+{% block journal_entries_block %}
+  <h2>Journal Entries</h2>
+
+  <form method="post" action="{% url 'journal_entries' %}">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Add Entry</button>
+  </form>
+
+  <h3>Previous Entries</h3>
+  <ul>
+    {% for entry in entries %}
+      <li>
+        <a href="{% url 'view_entry' entry.id %}">{{ entry.title }} - {{ entry.created_at }}</a>
+      </li>
+    {% endfor %}
+  </ul>
+{% endblock %}
+
+

@@ -3,3 +3,4 @@
 [About Us](https://github.com/StanfordCS194/Win24-Team37/wiki)
 
 Ashley
+Godsfavour

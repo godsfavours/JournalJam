@@ -4,8 +4,30 @@ from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from .forms import UserCreationForm, LoginForm, SignupForm, JournalEntryForm
 from django.contrib import messages
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from rest_framework import status
+from .serializers import UserSerializer
 
 # Create your views here.
+
+class LoginAPIView(APIView):
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+        user = authenticate(request, username=username, password=password)
+        
+        if user:
+            login(request, user)
+            serializer = UserSerializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response({'detail': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+
+class LogoutAPIView(APIView):
+    def post(self, request):
+        logout(request)
+        return Response({'detail': 'Logout successful'}, status=status.HTTP_200_OK)
 
 @login_required(login_url='login')  # Specify the login URL
 def journal_entries(request):

@@ -1,5 +1,5 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import React, { useEffect, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import LoginCard from './LoginCard';
 import SignupCard from './SignupCard';
 import Container from 'react-bootstrap/Container';
@@ -7,6 +7,14 @@ import Row from 'react-bootstrap/Row';
 import Col from 'react-bootstrap/Col';
 
 const LandingPage = () => {
+  let location = useLocation();
+  const [showLogin, setShowLogin] = useState(true);
+
+  useEffect(() => {
+    setShowLogin(location.pathname === '/login');
+    console.log(location);
+  }, [location]);
+
   return (
     <Container>
       <Row className='vh-100'>
@@ -15,12 +23,9 @@ const LandingPage = () => {
           <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Commodi consectetur corrupti, optio exercitationem excepturi incidunt harum repellendus aliquam ex quia vero quas quos tempore ab fugiat eaque cupiditate culpa sequi.</p>
         </Col>
         <Col className="d-flex align-items-center">
-          <BrowserRouter>
-            <Routes>
-              <Route path="/login" element={<LoginCard />} />
-              <Route path="/signup" element={<SignupCard />} />
-            </Routes>
-          </BrowserRouter>
+          {
+            showLogin ? <LoginCard /> : <SignupCard />
+          }
         </Col >
       </Row >
 

@@ -4,7 +4,7 @@
 
 ## Local Development
 
-* Set up backend
+### Set up backend
 ```
 pip instal django
 pip install djangorestframework
@@ -13,9 +13,10 @@ cd backend
 python manage.py runserver
 ```
 
-* Set up frontend
+### Set up frontend
 ```
 cd frontend
 npm install
 npm start
 ```
+Go to http://localhost:3000

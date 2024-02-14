@@ -4,7 +4,6 @@ from rest_framework.test import APIClient
 from rest_framework import status
 
 # Create your tests here.
-# tests.py
 class APITests(TestCase):
     def setUp(self):
         # Create a test user

@@ -3,6 +3,7 @@ import Alert from 'react-bootstrap/Alert';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
+import '../App.css';
 
 const SignupCard = () => {
   const [username, setUsername] = useState("");
@@ -64,12 +65,15 @@ const SignupCard = () => {
   }
 
   return (
-    <Card className="p-4">
-      {error && <Alert variant="danger" onClose={() => setError("")} dismissible>
-        {error}
-      </Alert>}
+    <Card className="p-4 w-25r">
       <Form onSubmit={handleSubmit}>
         <h4 className='mb-3'>Create a Journal Jam account</h4>
+        {
+          error &&
+          <Alert variant="danger" onClose={() => setError("")} dismissible>
+            {error}
+          </Alert>
+        }
         <Form.Group className="mb-3" controlId="usernameInput">
           <Form.Label>Username*</Form.Label>
           <Form.Control

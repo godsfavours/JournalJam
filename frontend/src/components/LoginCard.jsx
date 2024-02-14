@@ -1,8 +1,12 @@
 import React, { useState } from 'react';
+import axios from 'axios';
 import Alert from 'react-bootstrap/Alert';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
+import Modal from 'react-bootstrap/Modal';
+
+import '../App.css';
 
 const LoginCard = () => {
   const [username, setUsername] = useState("");
@@ -11,8 +15,11 @@ const LoginCard = () => {
   const [passwordInvalid, setPasswordInvalid] = useState("");
   const [error, setError] = useState("");
   const [remember, setRemember] = useState(true);
+  const [showModal, setShowModal] = useState(false);
 
-  const handleSubmit = (e) => {
+  const [user, setUser] = useState({ username: "", id: Number });
+
+  const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!username) {
@@ -22,9 +29,18 @@ const LoginCard = () => {
       setPasswordInvalid("Password is required.");
       document.getElementById("passwordInput").focus();
     } else {
-      console.log('logging in...');
+      try {
+        let res = await axios.post('http://localhost:8000/api/login/', {
+          username,
+          password
+        });
+        console.log(res);
+        setShowModal(true);
+        setUser({ username: res.data.username, id: res.data.id });
+      } catch (error) {
+        setError(error.message);
+      }
     }
-
   }
 
   const handleUsernameChange = (e) => {
@@ -40,12 +56,16 @@ const LoginCard = () => {
   }
 
   return (
-    <Card className="p-4">
-      {error && <Alert variant="danger" onClose={() => setError("")} dismissible>
-        {error}
-      </Alert>}
+    <>
+      <Card className="p-4 w-25r">
       <Form onSubmit={handleSubmit}>
         <h4 className='mb-3'>Sign into Journal Jam</h4>
+          {
+            error &&
+            <Alert variant="danger" onClose={() => setError("")} dismissible>
+              {error}
+            </Alert>
+          }
         <Form.Group className="mb-3" controlId="usernameInput">
           <Form.Label>Username</Form.Label>
           <Form.Control
@@ -86,6 +106,18 @@ const LoginCard = () => {
         <p className='mt-3 text-center'><a href="/signup">Create an account</a></p>
       </Form>
     </Card>
+      <Modal show={showModal} onHide={() => setShowModal(false)}>
+        <Modal.Header closeButton>
+          <Modal.Title>User {user.username} logged in</Modal.Title>
+        </Modal.Header>
+        <Modal.Body>User {user.username} with id {user.id} logged in!</Modal.Body>
+        <Modal.Footer>
+          <Button variant="secondary" onClick={() => setShowModal(false)}>
+            Close
+          </Button>
+        </Modal.Footer>
+      </Modal>
+    </>
   );
 }
 

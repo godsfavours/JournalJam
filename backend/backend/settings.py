@@ -53,6 +53,14 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
 ]
 
+# REST_FRAMEWORK = {"DEFAULT_PERMISSION_CLASSES": ["rest_framework.permission.AllowAny"]}
+
+CORS_ORIGIN_WHITELIST = ["http://localhost:3000"]
+
+# CORS_ORIGIN_ALLOW_ALL = True
+
+CSRF_TRUSTED_ORIGINS = ["http://localhost:3000"]
+
 ROOT_URLCONF = "backend.urls"
 
 TEMPLATES = [
@@ -125,7 +133,3 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
-
-CORS_ORIGIN_WHITELIST = [
-     'http://localhost:3000'
-]

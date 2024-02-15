@@ -1,23 +1,24 @@
 import React from 'react'
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
-import Login from './components/Login/Login'
-import Signup from './components/Signup/Signup'
+import { BrowserRouter, Routes, Route } from 'react-router-dom';
+import axios from 'axios'
+import LandingPage from './components/LandingPage'
+import NotFound from './components/NotFound';
 
-class App extends React.Component {
-  constructor(props) {
-    super(props);
-  }
+const App = () => {
+  const renderPaths = (paths, Element) =>
+    paths.map((path) => <Route key={path} path={path} element={Element} />);
 
-  render() {
-    return (
+  return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Login />}></Route>
-        <Route path="/signup" element={<Signup />}></Route>
+        {renderPaths(["/login", "/signup"], <LandingPage />)}
+        <Route
+          path="*"
+          element={<NotFound />}
+        />
       </Routes>
     </BrowserRouter>
-    )
-  }
+  )
 }
 
 export default App

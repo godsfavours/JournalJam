@@ -7,9 +7,45 @@ from django.contrib import messages
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
+from django.contrib.auth.models import User
 from .serializers import UserSerializer
 
 # Create your views here.
+
+class CreateUserAPIView(APIView):
+    def post(self, request):
+        form = SignupForm(request.data)  # Replace with your actual form or serializer
+        if form.is_valid():
+            username = form.cleaned_data['username']
+            password = form.cleaned_data['password1']
+            form.save()
+            user = authenticate(request, username=username, password=password)
+
+            if user:
+                login(request, user)
+                return Response(status=status.HTTP_201_CREATED)
+            else:
+                return Response({'detail': 'Authentication failed'}, status=status.HTTP_401_UNAUTHORIZED)
+        else:
+            return Response({'detail': 'Invalid signup data'}, status=status.HTTP_400_BAD_REQUEST)
+
+class GetUserAPIView(APIView):
+    def get(self, request, user_id):
+        try:
+            user = User.objects.get(id=user_id)
+            serializer = UserSerializer(user)
+            return Response(serializer.data)
+        except User.DoesNotExist:
+            return Response({'detail': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+
+class CurrentUserAPIView(APIView):
+    def get(self, request):
+        user = request.user
+        if user and user.id is not None:
+            serializer = UserSerializer(user)
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response({'detail': 'No user is currently logged in'}, status=status.HTTP_404_NOT_FOUND)
 
 class LoginAPIView(APIView):
     def post(self, request):

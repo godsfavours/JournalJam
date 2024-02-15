@@ -3,6 +3,9 @@ from . import views
 
 urlpatterns = [
     path('', views.index, name='home'),
+    path('api/user/', views.CreateUserAPIView.as_view(), name='api-create-user'),
+    path('api/user/<int:user_id>/', views.GetUserAPIView.as_view(), name='api-get-user'),
+    path('api/current_user/', views.CurrentUserAPIView.as_view(), name='api-current-user'),
     path('api/login/', views.LoginAPIView.as_view(), name='login_api'),
     path('api/logout/', views.LogoutAPIView.as_view(), name='logout_api'),
     path('login/', views.user_login, name='login'),

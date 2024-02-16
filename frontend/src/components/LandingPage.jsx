@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, Navigate } from 'react-router-dom';
 import LoginCard from './LoginCard';
 import SignupCard from './SignupCard';
 import Container from 'react-bootstrap/Container';
@@ -8,14 +8,30 @@ import Col from 'react-bootstrap/Col';
 
 const LandingPage = () => {
   let location = useLocation();
+  const [loaded, setLoaded] = useState(false);
   const [showLogin, setShowLogin] = useState(true);
+  const [isAuth, setIsAuth] = useState(false);
 
   useEffect(() => {
+    const checkAuth = async () => {
+      setLoaded(false);
+      try {
+        const res = await axios.get('/api/current_user/');
+        setIsAuth(true);
+      } catch (error) {
+        setIsAuth(false);
+      } finally {
+        setLoaded(true);
+      }
+    };
+    checkAuth();
+
     setShowLogin(location.pathname === '/login');
-    console.log(location);
   }, [location]);
 
-  return (
+  if (!loaded) return null;
+
+  return isAuth ? <Navigate to="/" /> : (
     <Container>
       <Row className='vh-100'>
         <Col xs={7} className="d-flex flex-column justify-content-center align-items-center">

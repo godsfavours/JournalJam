@@ -59,7 +59,7 @@ CORS_ORIGIN_WHITELIST = ["http://localhost:3000"]
 
 # CORS_ORIGIN_ALLOW_ALL = True
 
-CSRF_TRUSTED_ORIGINS = ["http://localhost:3000"]
+CSRF_TRUSTED_ORIGINS = ["http://localhost:8000/"]
 
 ROOT_URLCONF = "backend.urls"
 

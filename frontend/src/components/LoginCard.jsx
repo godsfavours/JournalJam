@@ -101,7 +101,7 @@ const LoginCard = () => {
                 <>Sign in</>
             }
           </Button>
-          <p className='mt-3 text-center'><a href="/signup">Create an account</a></p>
+          <p className='mt-3 text-center'><a href={`/signup?un=${username}`}>Create an account</a></p>
         </Form>
       </Card>
     </>

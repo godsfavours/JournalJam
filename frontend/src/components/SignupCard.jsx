@@ -1,5 +1,6 @@
 import axios from 'axios';
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { useSearchParams } from "react-router-dom";
 import Alert from 'react-bootstrap/Alert';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
@@ -19,6 +20,11 @@ const SignupCard = () => {
   const [passwordConfirmationInvalid, setPasswordConfirmationInvalid] = useState("");
   const [error, setError] = useState("");
   const [signingIn, setSigningIn] = useState(false);
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  useEffect(() => {
+    setUsername(searchParams.get("un"));
+  }, []);
 
   const validateUsername = () => {
     let valid = true;
@@ -101,6 +107,7 @@ const SignupCard = () => {
         'password1': password,
         'password2': passwordConfirmation,
       });
+      setSearchParams(undefined);
       window.location.pathname = '/';
     } catch (error) {
       // TODO: better informative error messages

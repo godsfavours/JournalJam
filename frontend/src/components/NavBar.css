@@ -1,5 +1,10 @@
-.rightAlignedContainer>*:not(:last-child) {
-  margin-right: 30px;
+/* space between children 10px */
+.sb-c-10>*:not(:last-child) {
+  margin-right: 10px;
+}
+
+.sb-c-1>*:not(:last-child) {
+  margin-right: 2px;
 }
 
 #signOutBtn {

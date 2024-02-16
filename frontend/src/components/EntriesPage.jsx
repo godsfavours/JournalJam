@@ -5,6 +5,7 @@ const EntriesPage = ({ user }) => {
   return (
     <>
       <NavBar user={user} />
+      <p>Signed in as {user.username}</p>
     </>
   )
 }

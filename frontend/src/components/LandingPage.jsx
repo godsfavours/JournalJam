@@ -1,4 +1,3 @@
-import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { useLocation, Navigate } from 'react-router-dom';
 import LoginCard from './LoginCard';

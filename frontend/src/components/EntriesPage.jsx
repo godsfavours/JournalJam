@@ -1,10 +1,10 @@
 import React from 'react'
 import NavBar from './NavBar';
 
-const EntriesPage = ({ user, toggleTheme }) => {
+const EntriesPage = ({ user, theme, toggleTheme }) => {
   return (
     <>
-      <NavBar user={user} toggleTheme={toggleTheme} />
+      <NavBar user={user} theme={theme} toggleTheme={toggleTheme} />
       <p>Signed in as {user.username}</p>
     </>
   )

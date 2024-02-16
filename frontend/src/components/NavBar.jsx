@@ -1,5 +1,5 @@
 import axios from 'axios';
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { getCsrfToken } from '../utils';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
@@ -8,11 +8,19 @@ import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
+import Brightness4Icon from '@mui/icons-material/Brightness4';
+import Brightness7Icon from '@mui/icons-material/Brightness7';
 
 import './NavBar.css';
 
-const NavBar = ({ user, toggleTheme }) => {
-  const [anchorEl, setAnchorEl] = React.useState(null);
+const NavBar = ({ theme, user, toggleTheme }) => {
+  const [anchorEl, setAnchorEl] = useState(null);
+  const [modeText, setModeText] = useState(null);
+
+  useEffect(() => {
+    setModeText(
+      `${window.localStorage.getItem('app-theme') === 'dark' ? 'Light' : 'Dark'} mode`);
+  }, [theme]);
 
   const onSignOut = async (e) => {
     e.preventDefault();
@@ -68,7 +76,9 @@ const NavBar = ({ user, toggleTheme }) => {
           open={Boolean(anchorEl)}
           onClose={handleCloseMenu}
         >
-          <MenuItem onClick={toggleTheme}>Toggle Theme</MenuItem>
+          <MenuItem onClick={toggleTheme}>
+            {modeText}
+          </MenuItem>
           <MenuItem onClick={handleCloseMenu}>My Account</MenuItem>
           <MenuItem onClick={onSignOut}>Sign out</MenuItem>
         </Menu>

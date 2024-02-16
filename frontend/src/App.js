@@ -58,6 +58,7 @@ const App = () => {
               renderPaths(["/", "/entries"],
               <EntriesPage
                 user={user}
+                theme={theme}
                 toggleTheme={onToggleTheme}
                 />)
             }

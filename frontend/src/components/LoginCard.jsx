@@ -4,6 +4,7 @@ import Alert from 'react-bootstrap/Alert';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
+import Spinner from 'react-bootstrap/Spinner';
 
 import '../App.css';
 
@@ -13,7 +14,7 @@ const LoginCard = () => {
   const [password, setPassword] = useState("");
   const [passwordInvalid, setPasswordInvalid] = useState("");
   const [error, setError] = useState("");
-  const [remember, setRemember] = useState(true);
+  const [signingIn, setSigningIn] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -25,14 +26,21 @@ const LoginCard = () => {
       setPasswordInvalid("Password is required.");
       document.getElementById("passwordInput").focus();
     } else {
+      setSigningIn(true);
       try {
-        const res = await axios.post('/api/login/', {
+        await axios.post('/api/login/', {
           username,
           password
         });
         window.location.pathname = '/';
       } catch (error) {
-        setError(error.message);
+        if (error.response.status === 401) {
+          setError('Could not find a user with that username and password.');
+        } else {
+          setError(error.message);
+        }
+      } finally {
+        setSigningIn(false);
       }
     }
   }
@@ -73,7 +81,7 @@ const LoginCard = () => {
               {usernameInvalid}
             </Form.Control.Feedback>
           </Form.Group>
-          <Form.Group className="mb-3" controlId="passwordInput">
+          <Form.Group className="mb-4" controlId="passwordInput">
             <Form.Label>Password</Form.Label>
             <Form.Control
               type="password"
@@ -86,16 +94,12 @@ const LoginCard = () => {
               {passwordInvalid}
             </Form.Control.Feedback>
           </Form.Group>
-          <Form.Group className="mb-3" controlId="rememberInput">
-            <Form.Check
-              type="checkbox"
-              label="Remember me"
-              defaultChecked={remember}
-              onChange={() => setRemember(!remember)}
-            />
-          </Form.Group>
           <Button className="w-100" variant="primary" type="submit">
-            Sign in
+            {
+              signingIn ?
+                <Spinner animation="border" role="status" size="sm" /> :
+                <>Sign in</>
+            }
           </Button>
           <p className='mt-3 text-center'><a href="/signup">Create an account</a></p>
         </Form>

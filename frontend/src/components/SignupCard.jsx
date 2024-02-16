@@ -1,8 +1,11 @@
+import axios from 'axios';
 import React, { useState } from 'react'
 import Alert from 'react-bootstrap/Alert';
 import Form from 'react-bootstrap/Form';
 import Button from 'react-bootstrap/Button';
 import Card from 'react-bootstrap/Card';
+import Spinner from 'react-bootstrap/Spinner';
+
 import '../App.css';
 
 const SignupCard = () => {
@@ -15,27 +18,101 @@ const SignupCard = () => {
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
   const [passwordConfirmationInvalid, setPasswordConfirmationInvalid] = useState("");
   const [error, setError] = useState("");
+  const [signingIn, setSigningIn] = useState(false);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-
+  const validateUsername = () => {
+    let valid = true;
     if (!username) {
       setUsernameInvalid("Username is required.");
+      valid = false;
+    }
+
+    if (!valid)
       document.getElementById("usernameInput").focus();
-    } else if (!email) {
+
+    return valid;
+  }
+
+  const validateEmail = () => {
+    let valid = true;
+
+    if (!email) {
       setEmailInvalid("Email is required.");
+      valid = false;
+    } else if (!email.toLowerCase()
+      .match(
+        /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|.(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/
+      )) {
+      setEmailInvalid("Please enter a valid email.");
+      valid = false;
+    }
+
+    if (!valid)
       document.getElementById("emailInput").focus();
-    } else if (!password) {
+
+    return valid;
+  }
+
+  const validatePassword = () => {
+    let valid = true;
+
+    if (!password) {
       setPasswordInvalid("Password is required.");
+      valid = false;
+    }
+
+
+    if (!valid)
       document.getElementById("passwordInput").focus();
-    } else if (!passwordConfirmation) {
+
+    return valid;
+  }
+
+  const validatePasswordConfirmation = () => {
+    let valid = true;
+
+    if (!passwordConfirmation) {
       setPasswordConfirmationInvalid("Please confirm your password.");
-      document.getElementById("passwordConfirmInput").focus();
+      valid = false;
     } else if (password !== passwordConfirmation) {
       setPasswordConfirmationInvalid("Password does not match.");
+      valid = false;
+    }
+
+    if (!valid)
       document.getElementById("passwordConfirmInput").focus();
-    } else {
-      console.log('signing up...');
+
+    return valid;
+  }
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+
+    if (!validateUsername() || !validateEmail() || !validatePassword()
+      || !validatePasswordConfirmation())
+      return;
+
+    setSigningIn(true);
+    try {
+      console.log('creating user...');
+      const res = await axios.post('/api/user/', {
+        username,
+        email,
+        'password1': password,
+        'password2': passwordConfirmation,
+      });
+      window.location.pathname = '/';
+    } catch (error) {
+      // TODO: better informative error messages
+      if (error.response.status === 400) {
+        setError('Username is taken. Please try a different username.');
+        setUsernameInvalid('Username unavailable.');
+      } else {
+        console.log(error)
+        setError(error.message);
+      }
+    } finally {
+      setSigningIn(false);
     }
   }
 
@@ -130,7 +207,11 @@ const SignupCard = () => {
           className='w-100'
           variant="primary"
           type="submit">
-          Sign up
+          {
+            signingIn ?
+              <Spinner animation="border" role="status" size="sm" /> :
+              <>Sign up</>
+          }
         </Button>
         <p className='mt-3 text-center'>Already have an account? <a href="/login">Log in</a></p>
       </Form>

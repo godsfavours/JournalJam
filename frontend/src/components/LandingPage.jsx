@@ -1,6 +1,6 @@
+import axios from 'axios';
 import React, { useEffect, useState } from 'react';
 import { useLocation, Navigate } from 'react-router-dom';
-import axios from 'axios';
 import LoginCard from './LoginCard';
 import SignupCard from './SignupCard';
 import Container from 'react-bootstrap/Container';

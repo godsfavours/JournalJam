@@ -1,13 +1,13 @@
+import axios from 'axios';
 import React, { useState } from 'react'
 import Container from 'react-bootstrap/Container';
 import Navbar from 'react-bootstrap/Navbar';
 import Button from 'react-bootstrap/Button';
 import Spinner from 'react-bootstrap/Spinner';
 import './NavBar.css';
-import axios from 'axios';
 import { getCsrfToken } from '../utils';
 
-const NavBar = ({ user, setToast }) => {
+const NavBar = ({ user }) => {
   const [signingOut, setSigningOut] = useState(false);
 
   const onSignOut = async (e) => {
@@ -20,11 +20,8 @@ const NavBar = ({ user, setToast }) => {
           'X-CSRFTOKEN': csrftoken,
         }
       });
-      // console.log(res);
       window.location.pathname = '/login';
-      setToast({ show: true, header: 'Successfully signed out!' });
     } catch (error) {
-      setToast({ show: true, header: 'Unable to sign out.', body: error.message });
     } finally {
       setSigningOut(false);
     }

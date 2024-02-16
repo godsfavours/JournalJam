@@ -1,4 +1,5 @@
-// Verifies a user’s permissions and authentication status.
+// Verifies a user’s permissions and authentication status to allow access to
+// certain routes.
 
 import React, { useEffect, useState } from 'react'
 import { Outlet, Navigate, useLocation } from 'react-router-dom'

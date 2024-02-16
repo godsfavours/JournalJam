@@ -1,10 +1,10 @@
-import React, { useEffect } from 'react'
+import React from 'react'
 import NavBar from './NavBar';
 
-const EntriesPage = ({ user, setToast }) => {
+const EntriesPage = ({ user }) => {
   return (
     <>
-      <NavBar user={user} setToast={setToast} />
+      <NavBar user={user} />
     </>
   )
 }

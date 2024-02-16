@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { BrowserRouter, Routes, Route, } from 'react-router-dom';
 import LandingPage from './components/LandingPage'
 import NotFound from './components/NotFound';
@@ -18,10 +18,6 @@ const App = () => {
   const onSetToast = (toast) => {
     setToast(toast);
   }
-
-  useEffect(() => {
-    console.log(user);
-  }, [user]);
 
   const renderPaths = (paths, Element) =>
     paths.map((path) => <Route key={path} path={path} element={Element} />);

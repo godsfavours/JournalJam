@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useLocation, Navigate } from 'react-router-dom';
-import axios from 'axios'
+import axios from 'axios';
 import LoginCard from './LoginCard';
 import SignupCard from './SignupCard';
 import Container from 'react-bootstrap/Container';
@@ -28,7 +28,6 @@ const LandingPage = () => {
     checkAuth();
 
     setShowLogin(location.pathname === '/login');
-    console.log(location);
   }, [location]);
 
   if (!loaded) return null;

@@ -1,0 +1,7 @@
+.rightAlignedContainer>*:not(:last-child) {
+  margin-right: 30px;
+}
+
+#signOutBtn {
+  width: 7em;
+}

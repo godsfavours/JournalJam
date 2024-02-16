@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Alert from 'react-bootstrap/Alert';
 import Form from 'react-bootstrap/Form';
@@ -30,13 +30,15 @@ const LoginCard = () => {
       document.getElementById("passwordInput").focus();
     } else {
       try {
-        let res = await axios.post('http://localhost:8000/api/login/', {
+        // const res = await axios.post('/api/test/');
+        const res = await axios.post('/api/login/', {
           username,
           password
         });
-        console.log(res);
-        setShowModal(true);
-        setUser({ username: res.data.username, id: res.data.id });
+        // window.location.pathname = '/';
+        // setShowModal(true);
+
+        // setUser({ username: res.data.username, id: res.data.id });
       } catch (error) {
         setError(error.message);
       }

@@ -3,7 +3,6 @@
 
 import React, { useEffect, useState } from 'react'
 import { Outlet, Navigate, useLocation } from 'react-router-dom'
-import Spinner from 'react-bootstrap/Spinner';
 import axios from 'axios'
 
 const ProtectedRoutes = ({ component: Component, setUser }) => {
@@ -27,13 +26,7 @@ const ProtectedRoutes = ({ component: Component, setUser }) => {
     checkAuth();
   }, [location.pathname]);
 
-  if (!loaded) {
-    return (
-      <div className='vh-100 d-flex justify-content-center align-items-center'>
-        <Spinner animation="border" role="status" variant="primary" />
-      </div>
-    )
-  }
+  if (!loaded) return null;
 
   return isAuth ? <Outlet /> : <Navigate to="/login" />;
 };

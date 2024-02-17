@@ -10,7 +10,7 @@ import IconButton from '@mui/material/IconButton';
 import Collapse from '@mui/material/Collapse';
 import CloseIcon from '@mui/icons-material/Close';
 import { LoadingButton } from '@mui/lab';
-import { getCsrfToken } from '../utils';
+import Cookies from 'js-cookie';
 
 import '../App.css';
 
@@ -41,7 +41,7 @@ const SigninCard = () => {
           password
         }, {
           headers: {
-            'X-CSRFTOKEN': getCsrfToken(),
+            'X-CSRFTOKEN': Cookies.get('csrftoken'),
           },
         });
         window.location.pathname = '/';

@@ -11,7 +11,7 @@ import IconButton from '@mui/material/IconButton';
 import Collapse from '@mui/material/Collapse';
 import CloseIcon from '@mui/icons-material/Close';
 import { LoadingButton } from '@mui/lab';
-import { getCsrfToken } from '../utils';
+import Cookies from 'js-cookie';
 
 import '../App.css';
 
@@ -123,7 +123,7 @@ const SignupCard = () => {
         'password2': passwordConfirmation,
       }, {
         headers: {
-          'X-CSRFTOKEN': getCsrfToken(),
+          'X-CSRFTOKEN': Cookies.get('csrftoken'),
         },
       });
       setSearchParams(undefined);

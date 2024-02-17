@@ -1,6 +1,5 @@
 import axios from 'axios';
 import React, { useEffect, useState } from 'react'
-import { getCsrfToken } from '../utils';
 import AppBar from '@mui/material/AppBar';
 import Toolbar from '@mui/material/Toolbar';
 import Typography from '@mui/material/Typography';
@@ -10,6 +9,7 @@ import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
+import Cookies from 'js-cookie';
 
 import './NavBar.css';
 
@@ -25,10 +25,9 @@ const NavBar = ({ theme, user, toggleTheme }) => {
   const onSignOut = async (e) => {
     e.preventDefault();
     try {
-      const csrftoken = getCsrfToken();
       await axios.post('/api/logout/', null, {
         headers: {
-          'X-CSRFTOKEN': csrftoken,
+          'X-CSRFTOKEN': Cookies.get('csrftoken'),
         }
       });
       window.location.pathname = '/login';

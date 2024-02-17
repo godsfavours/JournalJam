@@ -23,11 +23,10 @@ const lightTheme = createTheme({
 const getTheme = () => {
   let appTheme = window.localStorage.getItem('app-theme');
   if (!appTheme) {
-    const useDarkTheme = useMediaQuery('(prefers-color-scheme: dark)');
-    window.localStorage.setItem('app-theme', useDarkTheme ? 'dark' : 'light');
-    return useDarkTheme ? darkTheme : lightTheme;
+    appTheme = useMediaQuery('(prefers-color-scheme: dark)') ? 'dark' : 'light';
+    window.localStorage.setItem('app-theme', appTheme);
   }
-  return appTheme === 'dark' ? darkTheme : lightTheme;
+  return appTheme;
 }
 
 const App = () => {
@@ -40,16 +39,17 @@ const App = () => {
   }
 
   const onToggleTheme = () => {
-    const theme = window.localStorage.getItem('app-theme');
-    window.localStorage.setItem('app-theme', theme === 'dark' ? 'light' : 'dark');
-    setTheme(theme === 'dark' ? lightTheme : darkTheme);
+    const newTheme =
+      window.localStorage.getItem('app-theme') === 'dark' ? 'light' : 'dark';
+    window.localStorage.setItem('app-theme', newTheme);
+    setTheme(newTheme);
   }
 
   const renderPaths = (paths, Element) =>
     paths.map((path) => <Route key={path} path={path} element={Element} />);
 
   return (
-    <ThemeProvider theme={theme}>
+    <ThemeProvider theme={theme === 'dark' ? darkTheme : lightTheme}>
       <CssBaseline />
       <BrowserRouter>
         <Routes>

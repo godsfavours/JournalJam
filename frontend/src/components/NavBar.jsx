@@ -10,6 +10,7 @@ import Menu from '@mui/material/Menu';
 import Brightness4Icon from '@mui/icons-material/Brightness4';
 import Brightness7Icon from '@mui/icons-material/Brightness7';
 import Cookies from 'js-cookie';
+import Button from '@mui/material/Button';
 
 import './NavBar.css';
 
@@ -19,7 +20,7 @@ const NavBar = ({ theme, user, toggleTheme }) => {
 
   useEffect(() => {
     setModeText(
-      `${window.localStorage.getItem('app-theme') === 'dark' ? 'Light' : 'Dark'} mode`);
+      `${theme === 'dark' ? 'Light' : 'Dark'} mode`);
   }, [theme]);
 
   const onSignOut = async (e) => {
@@ -44,7 +45,10 @@ const NavBar = ({ theme, user, toggleTheme }) => {
   };
 
   return (
-    <AppBar color="default" position="static" elevation={1}>
+    <AppBar color="default" position="static" style={{
+      backgroundColor: theme === 'dark' ? '' : 'white',
+      // borderBottom: theme === 'light' ? '2px solid lightgrey' : '',
+    }} elevation={0}>
       <Toolbar>
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           Journal Jam

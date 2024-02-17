@@ -40,6 +40,9 @@ const SignupCard = () => {
     if (!username) {
       setUsernameInvalid("Username is required.");
       valid = false;
+    } else if (username.length > 150) {
+      setUsernameInvalid("Username must be 150 characters or fewer.");
+      valid = false;
     }
 
     if (!valid)
@@ -74,8 +77,10 @@ const SignupCard = () => {
     if (!password) {
       setPasswordInvalid("Password is required.");
       valid = false;
+    } else if (password.length < 8) {
+      setPasswordInvalid("Password must contain at least 8 characters.");
+      valid = false;
     }
-
 
     if (!valid)
       passwordRef.current.focus();
@@ -121,11 +126,8 @@ const SignupCard = () => {
     } catch (error) {
       // TODO: better informative error messages
       if (error.response.status === 400) {
-        setError('Username is taken. Please try a different username.');
-        setUsernameInvalid('Username unavailable.');
-        usernameRef.current.focus();
+        setError('One or more fields is invalid. Check that your username only contains letters, digits and the following characters: @/./+/-/_. Also make sure that your password is not entirely numeric, a commonly used password, or too similar to your other personal information. As a last resort, try a different username.');
       } else {
-        console.log(error)
         setError(error.message);
       }
     } finally {
@@ -170,10 +172,9 @@ const SignupCard = () => {
         <Typography component="h2" variant="h5">
           Create a Journal Jam account
         </Typography>
-        <Collapse sx={{ mt: 1 }} fullWidth in={error}>
+        <Collapse sx={{ mt: 1 }} in={!!error}>
           <Alert
             severity="error"
-            fullWidth
             action={
               <IconButton
                 aria-label="close"
@@ -199,7 +200,7 @@ const SignupCard = () => {
             value={username}
             inputRef={usernameRef}
             onChange={handleUsernameChange}
-            error={usernameInvalid}
+            error={!!usernameInvalid}
             helperText={usernameInvalid}
             autoFocus
           />
@@ -211,7 +212,7 @@ const SignupCard = () => {
             value={email}
             inputRef={emailRef}
             onChange={handleEmailChange}
-            error={emailInvalid}
+            error={!!emailInvalid}
             helperText={emailInvalid}
           />
           <TextField
@@ -223,7 +224,7 @@ const SignupCard = () => {
             value={password}
             inputRef={passwordRef}
             onChange={handlePasswordChange}
-            error={passwordInvalid}
+            error={!!passwordInvalid}
             helperText={passwordInvalid}
           />
           <TextField
@@ -235,7 +236,7 @@ const SignupCard = () => {
             value={passwordConfirmation}
             inputRef={passwordConfirmationRef}
             onChange={handlePasswordConfirmationChange}
-            error={passwordConfirmationInvalid}
+            error={!!passwordConfirmationInvalid}
             helperText={passwordConfirmationInvalid}
           />
           <LoadingButton
@@ -248,9 +249,7 @@ const SignupCard = () => {
             Sign Up
           </LoadingButton>
           <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
-            <Link href="/login" variant="body">
-              Already have an account? Sign in
-            </Link>
+            <p>Already have an account? <Link href="\login">Sign in</Link></p>
           </Box>
         </Box>
       </Box>

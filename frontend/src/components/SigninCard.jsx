@@ -76,10 +76,10 @@ const SigninCard = () => {
         <Typography component="h1" variant="h5">
           Sign into Journal Jam
         </Typography>
-        <Collapse sx={{ mt: 1 }} fullWidth in={error}>
+        <Collapse sx={{ mt: 1 }} in={!!error}>
           <Alert
             severity="error"
-            fullWidth
+            // fullWidth
             action={
               <IconButton
                 aria-label="close"
@@ -106,7 +106,7 @@ const SigninCard = () => {
             value={username}
             inputRef={usernameRef}
             onChange={handleUsernameChange}
-            error={usernameInvalid}
+            error={!!usernameInvalid}
             helperText={usernameInvalid}
             autoFocus
           />
@@ -119,7 +119,7 @@ const SigninCard = () => {
             value={password}
             inputRef={passwordRef}
             onChange={handlePasswordChange}
-            error={passwordInvalid}
+            error={!!passwordInvalid}
             helperText={passwordInvalid}
           />
           <LoadingButton
@@ -131,11 +131,12 @@ const SigninCard = () => {
           >
             Sign In
           </LoadingButton>
-          <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+          {/* TODO(?): implement password reset */}
+          {/* <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
             <Link href={`#`} variant="body">
               Forgot password?
             </Link>
-          </Box>
+          </Box> */}
           <Box sx={{ mt: 2, width: '100%', display: 'flex', justifyContent: 'center' }}>
             <Link href={`/signup?un=${username}`} variant="body">
               Create an account

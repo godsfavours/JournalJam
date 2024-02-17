@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import { useLocation, Navigate } from 'react-router-dom';
 import SigninCard from './SigninCard';
 import SignupCard from './SignupCard';
@@ -18,7 +19,7 @@ const LandingPage = () => {
     const checkAuth = async () => {
       setLoaded(false);
       try {
-        const res = await axios.get('/api/current_user/');
+        await axios.get('/api/current_user/');
         setIsAuth(true);
       } catch (error) {
         setIsAuth(false);

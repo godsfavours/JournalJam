@@ -11,6 +11,7 @@ import IconButton from '@mui/material/IconButton';
 import Collapse from '@mui/material/Collapse';
 import CloseIcon from '@mui/icons-material/Close';
 import { LoadingButton } from '@mui/lab';
+import { getCsrfToken } from '../utils';
 
 import '../App.css';
 
@@ -120,6 +121,10 @@ const SignupCard = () => {
         email,
         'password1': password,
         'password2': passwordConfirmation,
+      }, {
+        headers: {
+          'X-CSRFTOKEN': getCsrfToken(),
+        },
       });
       setSearchParams(undefined);
       window.location.pathname = '/';
@@ -172,7 +177,7 @@ const SignupCard = () => {
         <Typography component="h2" variant="h5">
           Create a Journal Jam account
         </Typography>
-        <Collapse sx={{ mt: 1 }} in={!!error}>
+        <Collapse sx={{ mt: 1, width: '100%' }} in={!!error}>
           <Alert
             severity="error"
             action={
@@ -191,7 +196,7 @@ const SignupCard = () => {
             {error}
           </Alert>
         </Collapse>
-        <Box component="form" onSubmit={handleSubmit} noValidate sx={{ mt: 1 }}>
+        <Box component="form" onSubmit={handleSubmit} noValidate >
           <TextField
             margin="normal"
             fullWidth

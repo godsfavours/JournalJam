@@ -10,6 +10,7 @@ import IconButton from '@mui/material/IconButton';
 import Collapse from '@mui/material/Collapse';
 import CloseIcon from '@mui/icons-material/Close';
 import { LoadingButton } from '@mui/lab';
+import { getCsrfToken } from '../utils';
 
 import '../App.css';
 
@@ -38,6 +39,10 @@ const SigninCard = () => {
         await axios.post('/api/login/', {
           username,
           password
+        }, {
+          headers: {
+            'X-CSRFTOKEN': getCsrfToken(),
+          },
         });
         window.location.pathname = '/';
       } catch (error) {
@@ -76,10 +81,9 @@ const SigninCard = () => {
         <Typography component="h1" variant="h5">
           Sign into Journal Jam
         </Typography>
-        <Collapse sx={{ mt: 1 }} in={!!error}>
+        <Collapse sx={{ mt: 1, width: '100%' }} in={!!error}>
           <Alert
             severity="error"
-            // fullWidth
             action={
               <IconButton
                 aria-label="close"

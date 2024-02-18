@@ -1,25 +1,35 @@
 import axios from 'axios';
-import React, { useEffect, useState } from 'react'
+import React, { useState, useEffect } from 'react';
 import { useSearchParams } from "react-router-dom";
-import Alert from 'react-bootstrap/Alert';
-import Form from 'react-bootstrap/Form';
-import Button from 'react-bootstrap/Button';
-import Card from 'react-bootstrap/Card';
-import Spinner from 'react-bootstrap/Spinner';
+import TextField from '@mui/material/TextField';
+import Link from '@mui/material/Link';
+import Box from '@mui/material/Box';
+import Typography from '@mui/material/Typography';
+import Container from '@mui/material/Container';
+import Alert from '@mui/material/Alert';
+import IconButton from '@mui/material/IconButton';
+import Collapse from '@mui/material/Collapse';
+import CloseIcon from '@mui/icons-material/Close';
+import { LoadingButton } from '@mui/lab';
+import Cookies from 'js-cookie';
 
 import '../App.css';
 
 const SignupCard = () => {
   const [username, setUsername] = useState("");
   const [usernameInvalid, setUsernameInvalid] = useState("");
+  const usernameRef = React.useRef();
   const [email, setEmail] = useState("");
   const [emailInvalid, setEmailInvalid] = useState("");
+  const emailRef = React.useRef();
   const [password, setPassword] = useState("");
   const [passwordInvalid, setPasswordInvalid] = useState("");
+  const passwordRef = React.useRef();
   const [passwordConfirmation, setPasswordConfirmation] = useState("");
   const [passwordConfirmationInvalid, setPasswordConfirmationInvalid] = useState("");
+  const passwordConfirmationRef = React.useRef();
   const [error, setError] = useState("");
-  const [signingIn, setSigningIn] = useState(false);
+  const [signingUp, setSigningUp] = useState(false);
   const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
@@ -31,10 +41,13 @@ const SignupCard = () => {
     if (!username) {
       setUsernameInvalid("Username is required.");
       valid = false;
+    } else if (username.length > 150) {
+      setUsernameInvalid("Username must be 150 characters or fewer.");
+      valid = false;
     }
 
     if (!valid)
-      document.getElementById("usernameInput").focus();
+      usernameRef.current.focus();
 
     return valid;
   }
@@ -54,7 +67,7 @@ const SignupCard = () => {
     }
 
     if (!valid)
-      document.getElementById("emailInput").focus();
+      emailRef.current.focus();
 
     return valid;
   }
@@ -65,11 +78,13 @@ const SignupCard = () => {
     if (!password) {
       setPasswordInvalid("Password is required.");
       valid = false;
+    } else if (password.length < 8) {
+      setPasswordInvalid("Password must contain at least 8 characters.");
+      valid = false;
     }
 
-
     if (!valid)
-      document.getElementById("passwordInput").focus();
+      passwordRef.current.focus();
 
     return valid;
   }
@@ -86,7 +101,7 @@ const SignupCard = () => {
     }
 
     if (!valid)
-      document.getElementById("passwordConfirmInput").focus();
+      passwordConfirmationRef.current.focus();
 
     return valid;
   }
@@ -98,28 +113,30 @@ const SignupCard = () => {
       || !validatePasswordConfirmation())
       return;
 
-    setSigningIn(true);
+    setSigningUp(true);
     try {
       console.log('creating user...');
-      const res = await axios.post('/api/user/', {
+      await axios.post('/api/user/', {
         username,
         email,
         'password1': password,
         'password2': passwordConfirmation,
+      }, {
+        headers: {
+          'X-CSRFTOKEN': Cookies.get('csrftoken'),
+        },
       });
       setSearchParams(undefined);
       window.location.pathname = '/';
     } catch (error) {
       // TODO: better informative error messages
       if (error.response.status === 400) {
-        setError('Username is taken. Please try a different username.');
-        setUsernameInvalid('Username unavailable.');
+        setError('One or more fields is invalid. Check that your username only contains letters, digits and the following characters: @/./+/-/_. Also make sure that your password is not entirely numeric, a commonly used password, or too similar to your other personal information. As a last resort, try a different username.');
       } else {
-        console.log(error)
         setError(error.message);
       }
     } finally {
-      setSigningIn(false);
+      setSigningUp(false);
     }
   }
 
@@ -149,80 +166,99 @@ const SignupCard = () => {
   }
 
   return (
-    <Card className="p-4 w-25r">
-      <Form onSubmit={handleSubmit}>
-        <h4 className='mb-3'>Create a Journal Jam account</h4>
-        {
-          error &&
-          <Alert variant="danger" onClose={() => setError("")} dismissible>
+    <Container component="main" maxWidth="xs">
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+        }}
+      >
+        <Typography component="h2" variant="h5">
+          Create a Journal Jam account
+        </Typography>
+        <Collapse sx={{ mt: 1, width: '100%' }} in={!!error}>
+          <Alert
+            severity="error"
+            action={
+              <IconButton
+                aria-label="close"
+                color="inherit"
+                size="small"
+                onClick={() => {
+                  setError("");
+                }}
+              >
+                <CloseIcon fontSize="inherit" />
+              </IconButton>
+            }
+          >
             {error}
           </Alert>
-        }
-        <Form.Group className="mb-3" controlId="usernameInput">
-          <Form.Label>Username*</Form.Label>
-          <Form.Control
-            type="text"
-            placeholder="Enter username"
-            isInvalid={usernameInvalid}
+        </Collapse>
+        <Box component="form" onSubmit={handleSubmit} noValidate >
+          <TextField
+            margin="normal"
+            fullWidth
+            label="Username*"
+            name="username"
             value={username}
+            inputRef={usernameRef}
             onChange={handleUsernameChange}
+            error={!!usernameInvalid}
+            helperText={usernameInvalid}
+            autoFocus
           />
-          <Form.Control.Feedback type="invalid">
-            {usernameInvalid}
-          </Form.Control.Feedback>
-        </Form.Group>
-        <Form.Group className="mb-3" controlId="emailInput">
-          <Form.Label>Email*</Form.Label>
-          <Form.Control
-            type="text"
-            placeholder="Enter email"
-            isInvalid={emailInvalid}
+          <TextField
+            margin="normal"
+            fullWidth
+            label="Email*"
+            name="email"
             value={email}
+            inputRef={emailRef}
             onChange={handleEmailChange}
+            error={!!emailInvalid}
+            helperText={emailInvalid}
           />
-          <Form.Control.Feedback type="invalid">
-            {emailInvalid}
-          </Form.Control.Feedback>
-        </Form.Group>
-        <Form.Group className="mb-3" controlId="passwordInput">
-          <Form.Label>Password*</Form.Label>
-          <Form.Control
+          <TextField
+            margin="normal"
+            fullWidth
+            name="password"
+            label="Password*"
             type="password"
-            placeholder="Password"
-            isInvalid={passwordInvalid}
             value={password}
+            inputRef={passwordRef}
             onChange={handlePasswordChange}
+            error={!!passwordInvalid}
+            helperText={passwordInvalid}
           />
-          <Form.Control.Feedback type="invalid">
-            {passwordInvalid}
-          </Form.Control.Feedback>
-        </Form.Group>
-        <Form.Group className="mb-3" controlId="passwordConfirmInput">
-          <Form.Label>Confirm Password*</Form.Label>
-          <Form.Control
+          <TextField
+            margin="normal"
+            fullWidth
+            name="passwordConfirmation"
+            label="Confirm Password*"
             type="password"
-            placeholder="Confirm Password"
-            isInvalid={passwordConfirmationInvalid}
             value={passwordConfirmation}
+            inputRef={passwordConfirmationRef}
             onChange={handlePasswordConfirmationChange}
+            error={!!passwordConfirmationInvalid}
+            helperText={passwordConfirmationInvalid}
           />
-          <Form.Control.Feedback type="invalid">
-            {passwordConfirmationInvalid}
-          </Form.Control.Feedback>
-        </Form.Group>
-        <Button
-          className='w-100'
-          variant="primary"
-          type="submit">
-          {
-            signingIn ?
-              <Spinner animation="border" role="status" size="sm" /> :
-              <>Sign up</>
-          }
-        </Button>
-        <p className='mt-3 text-center'>Already have an account? <a href="/login">Log in</a></p>
-      </Form>
-    </Card>
+          <LoadingButton
+            loading={signingUp}
+            type="submit"
+            fullWidth
+            variant="contained"
+            sx={{ mt: 3, mb: 3 }}
+          >
+            Sign Up
+          </LoadingButton>
+          <Box sx={{ width: '100%', display: 'flex', justifyContent: 'center' }}>
+            <p>Already have an account? <Link href="\login">Sign in</Link></p>
+          </Box>
+        </Box>
+      </Box>
+    </Container>
   );
 }
 

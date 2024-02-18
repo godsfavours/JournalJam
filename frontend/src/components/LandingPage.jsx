@@ -1,10 +1,13 @@
 import React, { useEffect, useState } from 'react';
+import axios from 'axios';
 import { useLocation, Navigate } from 'react-router-dom';
-import LoginCard from './LoginCard';
+import SigninCard from './SigninCard';
 import SignupCard from './SignupCard';
-import Container from 'react-bootstrap/Container';
-import Row from 'react-bootstrap/Row';
-import Col from 'react-bootstrap/Col';
+import Box from '@mui/material/Box';
+import Paper from '@mui/material/Paper';
+import Grid from '@mui/material/Unstable_Grid2';
+import Typography from '@mui/material/Typography';
+
 
 const LandingPage = () => {
   let location = useLocation();
@@ -16,7 +19,7 @@ const LandingPage = () => {
     const checkAuth = async () => {
       setLoaded(false);
       try {
-        const res = await axios.get('/api/current_user/');
+        await axios.get('/api/current_user/');
         setIsAuth(true);
       } catch (error) {
         setIsAuth(false);
@@ -32,20 +35,46 @@ const LandingPage = () => {
   if (!loaded) return null;
 
   return isAuth ? <Navigate to="/" /> : (
-    <Container>
-      <Row className='vh-100'>
-        <Col xs={7} className="d-flex flex-column justify-content-center align-items-center">
-          <h1 className="display-1">Journal Jam</h1>
-          <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Commodi consectetur corrupti, optio exercitationem excepturi incidunt harum repellendus aliquam ex quia vero quas quos tempore ab fugiat eaque cupiditate culpa sequi.</p>
-        </Col>
-        <Col className="d-flex align-items-center">
-          {
-            showLogin ? <LoginCard /> : <SignupCard />
-          }
-        </Col >
-      </Row >
+    <Grid sx={{ ml: 5, mr: 5, maxWidth: '100%', height: '100vh' }} container spacing={2}>
+      <Grid alignItems="flex-end" xs={6}>
+        <Box
+          sx={
+            {
+              height: '100%',
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center"
+            }
+          }>
+          <Typography variant="h1">
+            Journal Jam
+          </Typography>
+          <Typography variant="body1">
+            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quaerat nemo blanditiis est doloremque illum suscipit praesentium optio error temporibus quidem, illo iste deserunt quis officiis consequuntur voluptatum, culpa qui maxime?
+          </Typography>
+        </Box>
+      </Grid>
+      <Grid xs={6}>
+        <Box
+          sx={
+            {
+              height: '100%',
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center"
+            }
+          }>
+          <Paper sx={{ padding: '20px 0' }} elevation={1}>
+            {
+              showLogin ? <SigninCard /> : <SignupCard />
+            }
+          </Paper>
+        </Box>
 
-    </Container >
+      </Grid>
+    </Grid>
   )
 }
 

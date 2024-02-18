@@ -50,7 +50,7 @@ const App = () => {
 
   return (
     <ThemeProvider theme={theme === 'dark' ? darkTheme : lightTheme}>
-      <CssBaseline />
+      <CssBaseline enableColorScheme />
       <BrowserRouter>
         <Routes>
           <Route element={<ProtectedRoutes setUser={onSetUser} />}>

@@ -72,36 +72,7 @@ class LogoutAPIView(APIView):
         logout(request)
         return Response({'detail': 'Logout successful'}, status=status.HTTP_200_OK)
 
-# @login_required(login_url='login')  # Specify the login URL
-# def journal_entries(request):
-#     entries = JournalEntry.objects.filter(user=request.user).order_by('-created_at')
-#     form = JournalEntryForm()
 
-#     if request.method == 'POST':
-#         form = JournalEntryForm(request.POST)
-#         if form.is_valid():
-#             entry = form.save(commit=False)
-#             entry.user = request.user
-#             entry.save()
-#             return redirect('journal_entries')
-
-#     return render(request, 'journal_entries.html', {'entries': entries, 'form': form})
-
-# @login_required(login_url='login')  # Specify the login URL
-# def view_entry(request, entry_id):
-#     entry = get_object_or_404(JournalEntry, id=entry_id, user=request.user)
-
-#     if request.method == 'POST':
-#         form = JournalEntryForm(request.POST, instance=entry)
-#         if form.is_valid():
-#             form.save()
-#             # Render the same template with the updated entry information
-#             return render(request, 'view_entry.html', {'entry': entry, 'form': form})
-#     else:
-#         form = JournalEntryForm(instance=entry)
-
-#     return render(request, 'view_entry.html', {'entry': entry, 'form': form})
-  
 def index(request):
   return render(request, 'index.html')
 

@@ -1,8 +1,8 @@
 // resizable panels: https://react-resizable-panels.vercel.app/
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useRef } from 'react'
 import NavBar from './NavBar';
-import { PanelGroup, Panel, PanelResizeHandle } from 'react-resizable-panels';
+import { PanelGroup, Panel, PanelResizeHandle, ImperativePanelHandle } from 'react-resizable-panels';
 import Paper from '@mui/material/Paper';
 import TextField from '@mui/material/TextField';
 import Box from '@mui/material/Box';
@@ -15,6 +15,14 @@ import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import { useSearchParams } from "react-router-dom";
+import IconButton from '@mui/material/IconButton';
+import OpenInFullIcon from '@mui/icons-material/OpenInFull';
+import KeyboardDoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeft';
+import KeyboardDoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
+import Grid from '@mui/material/Grid';
+import Divider from '@mui/material/Divider';
+
+const MAX_TITLE_LEN = 100;
 
 /* Override dialog appearing when Ctrl + S is pressed, so that the user
   can type it in the text field */
@@ -29,12 +37,19 @@ const preventDialogOnCtrlS = () => {
 const EntriesPage = ({ user, theme, toggleTheme }) => {
   const [lastSaved, setLastSaved] = useState(null);
   const [textAreaRows, setTextAreaRows] = useState(null);
+  const [panelHeight, setPanelHeight] = useState(null);
   const [entries, setEntries] = useState(null);
   const [entryTitle, setEntryTitle] = useState('');
   const [entryContent, setEntryContent] = useState('');
   const [selectedIndex, setSelectedIndex] = useState(null);
+  const [entryListMaxTitleLen, setEntryListMaxTitleLen] = useState(10);
+  const [journalEntriesCollapsed, setJournalEntriesCollapsed] = useState(false);
+  const [promptsCollapsed, setPromptsCollapsed] = useState(false);
 
-  const { height } = useWindowDimensions();
+  const journalEntriesPanelRef = useRef();
+  const promptPanelRef = useRef();
+
+  const { height, width } = useWindowDimensions();
   const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
@@ -51,26 +66,29 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
     preventDialogOnCtrlS();
   }, []);
 
-  /* Set the number of rows of the text field based on the window height */
   useEffect(() => {
+    /* Set the number of rows of the text field based on the window height */
     setTextAreaRows(0.04 * height - 8);
+    setPanelHeight(height - 80);
   }, [height]);
 
   useEffect(() => {
-    if (!entries || !entries[selectedIndex]) return;
+    if (!entries || !entries[selectedIndex])
+      return;
     setEntryContent(entries[selectedIndex].content);
     setEntryTitle(entries[selectedIndex].title);
   }, [selectedIndex]);
 
-  const onJournalEntrySelected = (e, index) => {
+  const handleJournalEntrySelected = (e, index) => {
     e.preventDefault();
     setSearchParams({ ...searchParams, s: index });
     setSelectedIndex(index);
   }
 
-  const updateEntry = (e, member) => {
+  const handleUpdate = (e, member) => {
     e.preventDefault();
     const val = e.target.value;
+
     let ent = [...entries];
     let entry = { ...entries[selectedIndex], [member]: val };
     ent[selectedIndex] = entry;
@@ -82,44 +100,128 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
     }
   }
 
-  const updateEntryTitle = (e) => {
-    updateEntry(e, 'title');
+  const handleUpdateTitle = (e) => {
+    e.preventDefault();
+    if (e.target.value.length > MAX_TITLE_LEN)
+      return;
+    handleUpdate(e, 'title');
   }
 
-  const updateEntryContent = (e) => {
-    updateEntry(e, 'content');
+  const handleUpdateContent = (e) => {
+    e.preventDefault();
+    handleUpdate(e, 'content');
   }
+
+  const handleCollapseJournalEntries = () => {
+    setJournalEntriesCollapsed(true);
+    journalEntriesPanelRef.current.collapse();
+  }
+
+  const handleExpandJournalEntries = () => {
+    setJournalEntriesCollapsed(false);
+    journalEntriesPanelRef.current.expand();
+  }
+
+  const handleResizeJournalEntries = () => {
+    const size = journalEntriesPanelRef.current.getSize();
+    const journalEntriesPanelWidthPx = (width * (size / 100)) - 60;
+    const len = journalEntriesPanelWidthPx * 0.12 - 0.9;
+    setEntryListMaxTitleLen(Math.max(len, 10));
+  }
+
+  const handleCollapsePrompts = () => {
+    setPromptsCollapsed(true);
+    promptPanelRef.current.collapse();
+  }
+
+  const handleExpandPrompts = () => {
+    setPromptsCollapsed(false);
+    promptPanelRef.current.expand();
+  }
+
+
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', maxHeight: '100vh', overflow: 'auto' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', }}>
       <NavBar user={user} theme={theme} toggleTheme={toggleTheme} />
-      <div style={{ marginLeft: '30px', marginRight: '30px', marginBottom: '10px', flexGrow: 1 }}>
-        <PanelGroup autoSaveId="persistence" direction="horizontal" style={{ height: '100%' }}>
-          <Panel minSize={10} defaultSize={25} collapsible={true} collapsedSize={5}>
+      <div
+        style={{
+          marginLeft: '30px',
+          marginRight: '30px',
+          marginBottom: '10px',
+          flexGrow: 1,
+        }}>
+        <PanelGroup
+          autoSaveId="persistence"
+          direction="horizontal"
+          style={{ height: '100%' }}>
+          <Panel
+            minSize={15}
+            defaultSize={25}
+            maxSize={25}
+            collapsible={true}
+            collapsedSize={5}
+            ref={journalEntriesPanelRef}
+            onCollapse={handleCollapseJournalEntries}
+            onExpand={handleExpandJournalEntries}
+            onResize={handleResizeJournalEntries}
+            style={{ height: '100%' }}
+          >
             <Paper
               variant="outlined"
-              style={
-                {
-                  height: '100%',
-                  maxHeight: '500px', /* TODO: programmatically set max height */
-                  overflow: 'auto'
-                }}
+              style={{
+                minHeight: `${panelHeight}px`,
+                maxHeight: `${panelHeight}px`, height: '100%',
+              }}
             >
-              <List
-              >
+              <Box
+                sx={{ display: 'flex', alignItems: 'center', m: 1, }}>
+                {
+                  !journalEntriesCollapsed &&
+                  <Typography sx={{ flexGrow: 1 }} variant="h6" >
+                    Journal entries
+                  </Typography>
+                }
+                <Box>
+                  {
+                    !journalEntriesCollapsed ?
+                      <IconButton aria-label="Minimize" onClick={handleCollapseJournalEntries}>
+                        <KeyboardDoubleArrowLeftIcon />
+                      </IconButton> :
+                      <IconButton aria-label="Expand" onClick={handleExpandJournalEntries}>
+                        <KeyboardDoubleArrowRightIcon />
+                      </IconButton>
+                  }
+                </Box>
+              </Box>
+              <Divider />
+              {
+                !journalEntriesCollapsed &&
+                <List
+                  style={{
+                      height: '100%',
+                      maxHeight: `${panelHeight}px`,
+                      overflow: 'auto'
+                    }}>
                 {entries &&
                   entries.map((entry, i) => (
                     <ListItemButton
                       sx={{ width: '100%' }}
                       key={i}
                       selected={selectedIndex === i}
-                      onClick={(e) => onJournalEntrySelected(e, i)}
+                      onClick={(e) => handleJournalEntrySelected(e, i)}
                     >
-                      <ListItemText primary={entry.title} />
+                      <ListItemText primary={
+                        entry.title.length > entryListMaxTitleLen ?
+                          `${entry.title.substring(0, entryListMaxTitleLen)}...` :
+                          entry.title
+                      } />
                     </ListItemButton>
                   ))
                 }
               </List>
+              }
+
             </Paper>
           </Panel>
           <PanelResizeHandle
@@ -133,11 +235,12 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
               variant="outlined"
               style={{
                 height: '100%',
-                maxHeight: '100%',
+                maxHeight: `${panelHeight}px`,
                 padding: '10px',
               }}
             >
-              {entryTitle &&
+              {
+                entryTitle !== null &&
                 <TextField
                   variant="standard"
                   fullWidth
@@ -148,21 +251,21 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
                     disableUnderline: true,
                     style: { fontSize: 20 }
                   }}
-                  onChange={updateEntryTitle}
+                  onChange={handleUpdateTitle}
                 />
               }
               <Typography variant="body1" >
                 What's on your mind?
               </Typography>
               <Box component="form" sx={{ mt: 1 }}>
-                {entryContent &&
+                {entryContent !== null &&
                 <TextField
                   variant="standard"
                   fullWidth
                   multiline
                   rows={textAreaRows}
                   value={entryContent}
-                  onChange={updateEntryContent}
+                  onChange={handleUpdateContent}
                   autoFocus
                   onKeyUp={(event) => {
                     event.preventDefault();
@@ -182,7 +285,7 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
                 }}
                 sx={{ mt: 1 }}
               >
-                <Button>Get AI Prompt</Button>
+                <Button variant="outlined">Get AI Prompt</Button>
                 <Typography variant="body2">{lastSaved ? `Last saved ${lastSaved}` : 'Unsaved'}</Typography>
               </Box>
             </Paper>
@@ -192,14 +295,43 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
               width: '7px'
             }}
           />
-          <Panel minSize={10} defaultSize={5} collapsible={true} collapsedSize={5}>
+          <Panel
+            minSize={15}
+            defaultSize={25}
+            maxSize={50}
+            collapsible={true}
+            collapsedSize={5}
+            ref={promptPanelRef}
+            onCollapse={handleCollapsePrompts}
+            onExpand={handleExpandPrompts}
+            style={{ height: '100%' }}>
             <Paper
               variant="outlined"
               style={{
-                height: '100%',
+                minHeight: `${panelHeight}px`,
+                maxHeight: `${panelHeight}px`,
               }}
             >
-              Prompts
+              <Box sx={{ display: 'flex', alignItems: 'center', m: 1, }}>
+                <Box>
+                  {
+                    promptsCollapsed ?
+                      <IconButton aria-label="Minimize" onClick={handleExpandPrompts}>
+                        <KeyboardDoubleArrowLeftIcon />
+                      </IconButton> :
+                      <IconButton aria-label="Expand" onClick={handleCollapsePrompts}>
+                        <KeyboardDoubleArrowRightIcon />
+                      </IconButton>
+                  }
+                </Box>
+                {
+                  !promptsCollapsed &&
+                  <Typography sx={{ flexGrow: 1 }} variant="h6" >
+                      Prompts
+                  </Typography>
+                }
+              </Box>
+              <Divider />
             </Paper>
           </Panel>
         </PanelGroup >

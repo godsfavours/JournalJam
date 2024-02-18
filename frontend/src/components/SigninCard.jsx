@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import axios from 'axios';
 import TextField from '@mui/material/TextField';
 import Link from '@mui/material/Link';
@@ -17,10 +17,10 @@ import '../App.css';
 const SigninCard = () => {
   const [username, setUsername] = useState("");
   const [usernameInvalid, setUsernameInvalid] = useState("");
-  const usernameRef = React.useRef();
+  const usernameRef = useRef();
   const [password, setPassword] = useState("");
   const [passwordInvalid, setPasswordInvalid] = useState("");
-  const passwordRef = React.useRef();
+  const passwordRef = useRef();
   const [error, setError] = useState("");
   const [signingIn, setSigningIn] = useState(false);
 

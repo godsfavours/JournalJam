@@ -8,8 +8,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Menu from '@mui/material/Menu';
 import Cookies from 'js-cookie';
-
-import './NavBar.css';
+import Button from '@mui/material/Button';
 
 const NavBar = ({ theme, user, toggleTheme }) => {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -50,7 +49,7 @@ const NavBar = ({ theme, user, toggleTheme }) => {
         <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           Journal Jam
         </Typography>
-        <Typography sx={{ mr: 1 }} variant="body1">{user.username}</Typography>
+        <Button variant="outlined">New Entry</Button>
         <IconButton
           size="large"
           aria-label="account of current user"

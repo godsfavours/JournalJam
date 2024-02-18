@@ -7,18 +7,7 @@ import EntriesPage from './components/EntriesPage';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
-
-const darkTheme = createTheme({
-  palette: {
-    mode: 'dark',
-  },
-});
-
-const lightTheme = createTheme({
-  palette: {
-    mode: 'light',
-  },
-});
+import { darkTheme, lightTheme } from './styles/themes';
 
 const getTheme = () => {
   let appTheme = window.localStorage.getItem('app-theme');

@@ -1,6 +1,6 @@
 // resizable panels: https://react-resizable-panels.vercel.app/
 
-import React, { useEffect, useState, useRef } from 'react'
+import React, { useEffect, useState, useRef, useReducer } from 'react'
 import NavBar from './NavBar';
 import { PanelGroup, Panel, PanelResizeHandle, ImperativePanelHandle } from 'react-resizable-panels';
 import Paper from '@mui/material/Paper';
@@ -12,36 +12,25 @@ import useWindowDimensions from '../hooks/useWindowDimensions';
 import { getEntries } from '../fake-db';
 import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
-import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
 import { useSearchParams } from "react-router-dom";
 import IconButton from '@mui/material/IconButton';
-import OpenInFullIcon from '@mui/icons-material/OpenInFull';
-import KeyboardDoubleArrowLeftIcon from '@mui/icons-material/KeyboardDoubleArrowLeft';
-import KeyboardDoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
-import Grid from '@mui/material/Grid';
-import Divider from '@mui/material/Divider';
+import ArrowForwardIosIcon from '@mui/icons-material/ArrowForwardIos';
+import ArrowBackIosNewIcon from '@mui/icons-material/ArrowBackIosNew';
+import useForceUpdate from 'use-force-update';
+import { preventDialogOnCtrlS } from '../utils';
 
 const MAX_TITLE_LEN = 100;
-
-/* Override dialog appearing when Ctrl + S is pressed, so that the user
-  can type it in the text field */
-const preventDialogOnCtrlS = () => {
-  document.addEventListener("keydown", (e) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === "s") {
-      e.preventDefault();
-    }
-  }, false);
-}
+const SELECTED_INDEX_KEY = 'si';
 
 const EntriesPage = ({ user, theme, toggleTheme }) => {
-  const [lastSaved, setLastSaved] = useState(null);
-  const [textAreaRows, setTextAreaRows] = useState(null);
-  const [panelHeight, setPanelHeight] = useState(null);
-  const [entries, setEntries] = useState(null);
+  const [lastSaved, setLastSaved] = useState(undefined);
+  const [textAreaRows, setTextAreaRows] = useState(undefined);
+  const [panelHeight, setPanelHeight] = useState(undefined);
+  const [entries, setEntries] = useState([]);
   const [entryTitle, setEntryTitle] = useState('');
   const [entryContent, setEntryContent] = useState('');
-  const [selectedIndex, setSelectedIndex] = useState(null);
+  const [selectedIndex, setSelectedIndex] = useState(undefined);
   const [entryListMaxTitleLen, setEntryListMaxTitleLen] = useState(10);
   const [journalEntriesCollapsed, setJournalEntriesCollapsed] = useState(false);
   const [promptsCollapsed, setPromptsCollapsed] = useState(false);
@@ -49,20 +38,18 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
   const journalEntriesPanelRef = useRef();
   const promptPanelRef = useRef();
 
+  const forceUpdate = useForceUpdate();
+
   const { height, width } = useWindowDimensions();
   const [searchParams, setSearchParams] = useSearchParams();
 
   useEffect(() => {
+    let e = getEntries();
+
     /* Get user entries */
-    const e = getEntries();
     setEntries(e);
 
-    /* Get selected journal entry */
-    let i = searchParams.get("s");
-    if (i) {
-      setSelectedIndex(Number(i));
-    }
-
+    /* Prevent dialog opening when Ctrl + S is pressed */
     preventDialogOnCtrlS();
   }, []);
 
@@ -73,43 +60,58 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
   }, [height]);
 
   useEffect(() => {
-    if (!entries || !entries[selectedIndex])
+    /* Updates editing panel based on the selected entry. */
+    if (!entries[selectedIndex])
       return;
     setEntryContent(entries[selectedIndex].content);
     setEntryTitle(entries[selectedIndex].title);
+    setLastSaved(entries[selectedIndex].createdAt.toLocaleString());
   }, [selectedIndex]);
+
+  useEffect(() => {
+    /* Get selected index from query string */
+    let i = searchParams.get(SELECTED_INDEX_KEY);
+    if (entries && i && i > entries.length - 1) {
+      i = undefined;
+    }
+    setSelectedIndex(i ? i : undefined);
+  }, [entries, searchParams]);
 
   const handleJournalEntrySelected = (e, index) => {
     e.preventDefault();
-    setSearchParams({ ...searchParams, s: index });
-    setSelectedIndex(index);
+    setSearchParams({ ...searchParams, [SELECTED_INDEX_KEY]: index });
   }
 
-  const handleUpdate = (e, member) => {
+  const handleEntryUpdate = (e, member) => {
     e.preventDefault();
-    const val = e.target.value;
 
-    let ent = [...entries];
+    const val = e.target.value;
+    let entries_clone = [...entries];
     let entry = { ...entries[selectedIndex], [member]: val };
-    ent[selectedIndex] = entry;
-    setEntries(ent);
+    entries_clone[selectedIndex] = entry;
+    setEntries(entries_clone);
+
+    // /* Update views */
     if (member === 'title') {
-      setEntryTitle(e.target.value);
+      setEntryTitle(val);
     } else if (member === 'content') {
-      setEntryContent(e.target.value);
+      setEntryContent(val);
+    } else if (member === 'createdAt') {
+      setLastSaved(val);
     }
   }
 
-  const handleUpdateTitle = (e) => {
+  const handleEntryUpdateTitle = (e) => {
     e.preventDefault();
     if (e.target.value.length > MAX_TITLE_LEN)
       return;
-    handleUpdate(e, 'title');
+    handleEntryUpdate(e, 'title');
   }
 
-  const handleUpdateContent = (e) => {
+  const handleEntryUpdateContent = (e) => {
     e.preventDefault();
-    handleUpdate(e, 'content');
+
+    handleEntryUpdate(e, 'content');
   }
 
   const handleCollapseJournalEntries = () => {
@@ -139,11 +141,30 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
     promptPanelRef.current.expand();
   }
 
+  const handleSave = (e) => {
+    e.preventDefault();
+    if (e.ctrlKey && e.key == 's') {
+      const date = new Date(Date.now()).toLocaleString();
+      e.target.value = date;
+      handleEntryUpdate(e, 'createdAt')
+    }
+  }
+
+  const handleNewEntry = (e) => {
+    e?.preventDefault();
+    const newEntry = { title: 'Untitled', content: '', createdAt: new Date() };
+    setEntryTitle(newEntry.title);
+    setEntryContent(newEntry.content);
+    setLastSaved(newEntry.createdAt.toLocaleString());
+    let newEntries = [newEntry].concat(entries);
+    setEntries(newEntries);
+    setSearchParams({ ...searchParams, [SELECTED_INDEX_KEY]: 0 });
+  }
 
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', }}>
-      <NavBar user={user} theme={theme} toggleTheme={toggleTheme} />
+      <NavBar user={user} theme={theme} toggleTheme={toggleTheme} onNewEntry={handleNewEntry} />
       <div
         style={{
           marginLeft: '30px',
@@ -186,15 +207,14 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
                   {
                     !journalEntriesCollapsed ?
                       <IconButton aria-label="Minimize" onClick={handleCollapseJournalEntries}>
-                        <KeyboardDoubleArrowLeftIcon />
+                        <ArrowBackIosNewIcon />
                       </IconButton> :
                       <IconButton aria-label="Expand" onClick={handleExpandJournalEntries}>
-                        <KeyboardDoubleArrowRightIcon />
+                        <ArrowForwardIosIcon />
                       </IconButton>
                   }
                 </Box>
               </Box>
-              <Divider />
               {
                 !journalEntriesCollapsed &&
                 <List
@@ -208,13 +228,13 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
                     <ListItemButton
                       sx={{ width: '100%' }}
                       key={i}
-                      selected={selectedIndex === i}
+                      selected={selectedIndex === i.toString()}
                       onClick={(e) => handleJournalEntrySelected(e, i)}
                     >
                       <ListItemText primary={
-                        entry.title.length > entryListMaxTitleLen ?
+                        entry?.title.length > entryListMaxTitleLen ?
                           `${entry.title.substring(0, entryListMaxTitleLen)}...` :
-                          entry.title
+                          entry?.title
                       } />
                     </ListItemButton>
                   ))
@@ -240,54 +260,57 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
               }}
             >
               {
-                entryTitle !== null &&
-                <TextField
-                  variant="standard"
-                  fullWidth
-                  value={entryTitle}
-                  style={{ fontSize: '50px' }}
-                  size="large"
-                  InputProps={{
-                    disableUnderline: true,
-                    style: { fontSize: 20 }
-                  }}
-                  onChange={handleUpdateTitle}
-                />
-              }
-              <Typography variant="body1" >
-                What's on your mind?
-              </Typography>
-              <Box component="form" sx={{ mt: 1 }}>
-                {entryContent !== null &&
-                <TextField
-                  variant="standard"
-                  fullWidth
-                  multiline
-                  rows={textAreaRows}
-                  value={entryContent}
-                  onChange={handleUpdateContent}
-                  autoFocus
-                  onKeyUp={(event) => {
-                    event.preventDefault();
-                    if (event.ctrlKey && event.key == 's') {
-                      setLastSaved(new Date(Date.now()).toISOString());
+                selectedIndex === undefined ?
+                  <><Button variant="outlined" onClick={handleNewEntry}>New entry</Button></> :
+                  <>
+                    {
+                      entryTitle !== undefined &&
+                      <TextField
+                        variant="standard"
+                        fullWidth
+                        name="title"
+                        value={entryTitle}
+                        style={{ fontSize: '50px' }}
+                        placeholder="Untitled"
+                        size="large"
+                        InputProps={{
+                          disableUnderline: true,
+                          style: { fontSize: 20 }
+                        }}
+                        onChange={handleEntryUpdateTitle}
+                        onKeyUp={handleSave}
+                      />
                     }
-                  }}
-
-                />
-                }
-              </Box>
-              <Box
-                style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center'
-                }}
-                sx={{ mt: 1 }}
-              >
-                <Button variant="outlined">Get AI Prompt</Button>
-                <Typography variant="body2">{lastSaved ? `Last saved ${lastSaved}` : 'Unsaved'}</Typography>
-              </Box>
+                    <Box component="form" sx={{ mt: 1 }}>
+                      {
+                        entryContent !== undefined &&
+                        <TextField
+                          variant="standard"
+                          name="content"
+                          fullWidth
+                          multiline
+                          rows={textAreaRows}
+                          value={entryContent}
+                          onChange={handleEntryUpdateContent}
+                          placeholder="What's on your mind?"
+                          autoFocus
+                          onKeyUp={handleSave}
+                        />
+                      }
+                    </Box>
+                    <Box
+                      style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center'
+                      }}
+                      sx={{ mt: 1 }}
+                    >
+                      <Button variant="outlined">Get AI Prompt</Button>
+                      <Typography variant="body2">{lastSaved ? `Last saved ${lastSaved}` : 'Unsaved'}</Typography>
+                    </Box>
+                  </>
+              }
             </Paper>
           </Panel>
           <PanelResizeHandle
@@ -317,10 +340,10 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
                   {
                     promptsCollapsed ?
                       <IconButton aria-label="Minimize" onClick={handleExpandPrompts}>
-                        <KeyboardDoubleArrowLeftIcon />
+                        <ArrowBackIosNewIcon />
                       </IconButton> :
                       <IconButton aria-label="Expand" onClick={handleCollapsePrompts}>
-                        <KeyboardDoubleArrowRightIcon />
+                        <ArrowForwardIosIcon />
                       </IconButton>
                   }
                 </Box>
@@ -331,7 +354,6 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
                   </Typography>
                 }
               </Box>
-              <Divider />
             </Paper>
           </Panel>
         </PanelGroup >

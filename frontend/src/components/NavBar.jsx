@@ -10,7 +10,7 @@ import Menu from '@mui/material/Menu';
 import Cookies from 'js-cookie';
 import Button from '@mui/material/Button';
 
-const NavBar = ({ theme, user, toggleTheme }) => {
+const NavBar = ({ theme, user, toggleTheme, onNewEntry }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [modeText, setModeText] = useState(null);
 
@@ -46,10 +46,16 @@ const NavBar = ({ theme, user, toggleTheme }) => {
       // borderBottom: theme === 'light' ? '2px solid lightgrey' : '',
     }} elevation={0}>
       <Toolbar>
-        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+        <Typography
+          variant="h6"
+          component="div"
+          sx={{ flexGrow: 1 }}>
           Journal Jam
         </Typography>
-        <Button variant="outlined">New Entry</Button>
+        <Button
+          variant="outlined"
+          onClick={onNewEntry}
+        >New Entry</Button>
         <IconButton
           size="large"
           aria-label="account of current user"

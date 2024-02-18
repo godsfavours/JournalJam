@@ -9,6 +9,7 @@ urlpatterns = [
     path('api/login/', views.LoginAPIView.as_view(), name='login_api'),
     path('api/logout/', views.LogoutAPIView.as_view(), name='logout_api'),
     path('entries/<int:user_id>/', views.JournalEntriesByUserAPIView.as_view(), name='journal_entries_by_user'),
+    path('entries/', views.CreateJournalEntryAPIView.as_view(), name='create_journal_entry'),
     path('login/', views.user_login, name='login'),
     path('signup/', views.user_signup, name='signup'),
     path('logout/', views.user_logout, name='logout'),

@@ -82,6 +82,7 @@ class JournalEntryAPITests(TestCase):
         # Create a test user
         self.client = APIClient()
         self.user = User.objects.create_user(username='testuser', password='testpassword')
+        self.user_two = User.objects.create_user(username='testuser2', password='testpassword')
 
         # Create some journal entries for the test user
         self.entry1 = JournalEntry.objects.create(user=self.user)
@@ -101,3 +102,25 @@ class JournalEntryAPITests(TestCase):
         expected_data = JournalEntrySerializer([self.entry1, self.entry2], many=True).data
 
         self.assertEqual(response.data, expected_data)
+    
+    def test_create_entries(self):
+        data = {
+            'user': self.user.id,
+            'last_updated': '2024-02-01T12:00:00Z',
+            'content': 'hello'
+        }
+        data_no_content = {
+            'user': self.user.id,
+            'last_updated': '2024-02-01T12:00:00Z',
+        }
+        self.client.login(username='testuser', password='testpassword')
+        response = self.client.post('/entries/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_201_CREATED)
+        response_no_content = self.client.post('/entries/', data_no_content, format='json')
+        self.assertEqual(response_no_content.status_code, status.HTTP_400_BAD_REQUEST)
+        self.client.logout()
+        # User is logged out and should have a permission error.
+        logged_out_response = self.client.post('/entries/', data, format='json')
+        self.assertEqual(logged_out_response.status_code, status.HTTP_403_FORBIDDEN)
+
+        

@@ -1,14 +1,15 @@
 from django.shortcuts import render, redirect, get_object_or_404
-from .models import JournalEntry
+from .models import JournalEntry, JournalEntryContent
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from .forms import UserCreationForm, LoginForm, SignupForm
 from django.contrib import messages
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from django.contrib.auth.models import User
-from .serializers import UserSerializer, JournalEntrySerializer
+from .serializers import UserSerializer, JournalEntrySerializer, JournalEntryContentSerializer
 
 # Create your views here.
 
@@ -18,6 +19,29 @@ class JournalEntriesByUserAPIView(APIView):
         serializer = JournalEntrySerializer(entries, many=True, context={'request': request})
         data = serializer.data
         return Response(data)
+
+class CreateJournalEntryAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        entry_serializer = JournalEntrySerializer(data=request.data)
+        if entry_serializer.is_valid():
+            entry_instance = entry_serializer.save(user=request.user)
+            entry_id = entry_instance.id
+            if ('content' or 'user' or 'last_updated') not in request.data:
+                return Response({'detail': 'Expect request to have user, content, and last_updated fields.'}, status=status.HTTP_400_BAD_REQUEST)
+            content_serializer = JournalEntryContentSerializer(data = {'user': request.data['user'], 'entry': entry_id, 'content': request.data['content'], 'last_updated': request.data['last_updated']})
+            if content_serializer.is_valid():
+                content_serializer.save(user=request.user)
+                data = {
+                    'entry_data': entry_serializer.data,
+                    'content_data': content_serializer.data
+                }
+                return Response(data, status=status.HTTP_201_CREATED)
+            else:
+                return Response(content_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        else:
+            return Response(entry_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class CreateUserAPIView(APIView):
     def post(self, request):

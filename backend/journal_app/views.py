@@ -2,15 +2,22 @@ from django.shortcuts import render, redirect, get_object_or_404
 from .models import JournalEntry
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
-from .forms import UserCreationForm, LoginForm, SignupForm, JournalEntryForm
+from .forms import UserCreationForm, LoginForm, SignupForm
 from django.contrib import messages
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework import status
 from django.contrib.auth.models import User
-from .serializers import UserSerializer
+from .serializers import UserSerializer, JournalEntrySerializer
 
 # Create your views here.
+
+class JournalEntriesByUserAPIView(APIView):
+    def get(self, request, user_id):
+        entries = JournalEntry.objects.filter(user=user_id)
+        serializer = JournalEntrySerializer(entries, many=True, context={'request': request})
+        data = serializer.data
+        return Response(data)
 
 class CreateUserAPIView(APIView):
     def post(self, request):
@@ -65,35 +72,35 @@ class LogoutAPIView(APIView):
         logout(request)
         return Response({'detail': 'Logout successful'}, status=status.HTTP_200_OK)
 
-@login_required(login_url='login')  # Specify the login URL
-def journal_entries(request):
-    entries = JournalEntry.objects.filter(user=request.user).order_by('-created_at')
-    form = JournalEntryForm()
+# @login_required(login_url='login')  # Specify the login URL
+# def journal_entries(request):
+#     entries = JournalEntry.objects.filter(user=request.user).order_by('-created_at')
+#     form = JournalEntryForm()
 
-    if request.method == 'POST':
-        form = JournalEntryForm(request.POST)
-        if form.is_valid():
-            entry = form.save(commit=False)
-            entry.user = request.user
-            entry.save()
-            return redirect('journal_entries')
+#     if request.method == 'POST':
+#         form = JournalEntryForm(request.POST)
+#         if form.is_valid():
+#             entry = form.save(commit=False)
+#             entry.user = request.user
+#             entry.save()
+#             return redirect('journal_entries')
 
-    return render(request, 'journal_entries.html', {'entries': entries, 'form': form})
+#     return render(request, 'journal_entries.html', {'entries': entries, 'form': form})
 
-@login_required(login_url='login')  # Specify the login URL
-def view_entry(request, entry_id):
-    entry = get_object_or_404(JournalEntry, id=entry_id, user=request.user)
+# @login_required(login_url='login')  # Specify the login URL
+# def view_entry(request, entry_id):
+#     entry = get_object_or_404(JournalEntry, id=entry_id, user=request.user)
 
-    if request.method == 'POST':
-        form = JournalEntryForm(request.POST, instance=entry)
-        if form.is_valid():
-            form.save()
-            # Render the same template with the updated entry information
-            return render(request, 'view_entry.html', {'entry': entry, 'form': form})
-    else:
-        form = JournalEntryForm(instance=entry)
+#     if request.method == 'POST':
+#         form = JournalEntryForm(request.POST, instance=entry)
+#         if form.is_valid():
+#             form.save()
+#             # Render the same template with the updated entry information
+#             return render(request, 'view_entry.html', {'entry': entry, 'form': form})
+#     else:
+#         form = JournalEntryForm(instance=entry)
 
-    return render(request, 'view_entry.html', {'entry': entry, 'form': form})
+#     return render(request, 'view_entry.html', {'entry': entry, 'form': form})
   
 def index(request):
   return render(request, 'index.html')

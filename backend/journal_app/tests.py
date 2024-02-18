@@ -2,6 +2,8 @@ from django.test import TestCase
 from django.contrib.auth.models import User
 from rest_framework.test import APIClient
 from rest_framework import status
+from .models import JournalEntry, JournalEntryContent
+from .serializers import JournalEntrySerializer
 
 # Create your tests here.
 class SignupLoginAPITests(TestCase):
@@ -74,3 +76,28 @@ class SignupLoginAPITests(TestCase):
         # Test successful logout
         response = self.client.post('/api/logout/')
         self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+class JournalEntryAPITests(TestCase):
+    def setUp(self):
+        # Create a test user
+        self.client = APIClient()
+        self.user = User.objects.create_user(username='testuser', password='testpassword')
+
+        # Create some journal entries for the test user
+        self.entry1 = JournalEntry.objects.create(user=self.user)
+        self.entry2 = JournalEntry.objects.create(user=self.user)
+
+        # Create entry content for the test entries
+        JournalEntryContent.objects.create(entry=self.entry1, user=self.user, content='Test Content 1')
+        JournalEntryContent.objects.create(entry=self.entry2, user=self.user, content='Test Content 2')
+    
+    def test_get_journal_entries_by_user(self):
+        url = f'/entries/{self.user.id}/'
+        response = self.client.get(url)
+
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+
+        # Ensure the response data matches the expected serialized data without 'content' field
+        expected_data = JournalEntrySerializer([self.entry1, self.entry2], many=True).data
+
+        self.assertEqual(response.data, expected_data)

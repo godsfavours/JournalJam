@@ -14,7 +14,7 @@ class LoginForm(forms.Form):
     username = forms.CharField()
     password = forms.CharField(widget=forms.PasswordInput)
 
-class JournalEntryForm(forms.ModelForm):
-    class Meta:
-        model = JournalEntry
-        fields = ['title', 'content']
+# class JournalEntryForm(forms.ModelForm):
+#     class Meta:
+#         model = JournalEntry
+#         fields = ['title', 'content']

@@ -107,7 +107,7 @@ class JournalEntryAPITests(TestCase):
         data = {
             'user': self.user.id,
             'title': 'Journal Title',
-            'content': 'hello'
+            'content': 'Content'
         }
 
         data_no_content = {
@@ -162,5 +162,32 @@ class JournalEntryAPITests(TestCase):
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.entry1.refresh_from_db()
         self.assertEqual(self.entry1.title, data['title'])
-
+    
+    def test_get_journal_entry_content(self):
         
+        self.client.login(username='testuser', password='testpassword')
+        response = self.client.get(f'/api/entries/{self.entry1.id}/content/')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.assertEqual(response.data['id'], self.content1.id)
+        self.assertEqual(response.data['entry_id'], self.entry1.id)
+        self.assertEqual(response.data['content'], self.content1.content)
+
+    def test_journal_entry_content_update(self):
+        
+        self.client.login(username='testuser', password='testpassword')
+        data = {
+            'user': self.user.id,
+            'content': 'Updated Content'
+        }
+        response = self.client.put(f'/api/entries/{self.entry1.id}/content/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.content1.refresh_from_db()
+        self.assertEqual(self.content1.content, 'Updated Content')
+
+    def test_journal_entry_content_partial_update(self):
+        self.client.login(username='testuser', password='testpassword')
+        data = {'content': 'Updated Content'}
+        response = self.client.patch(f'/api/entries/{self.entry2.id}/content/', data, format='json')
+        self.assertEqual(response.status_code, status.HTTP_200_OK)
+        self.content2.refresh_from_db()
+        self.assertEqual(self.content2.content, data['content'])

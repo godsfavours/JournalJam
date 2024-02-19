@@ -77,6 +77,41 @@ class JournalEntryDetailAPIView(APIView):
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
+class JournalEntryContentDetailAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, entry_id):
+        try:
+            content = JournalEntryContent.objects.get(entry_id=entry_id, user=request.user)
+            serializer = JournalEntryContentSerializer(content)
+            return Response(serializer.data)
+        except JournalEntryContent.DoesNotExist:
+            return Response({'detail': 'Journal entry content not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    def put(self, request, entry_id):
+        try:
+            content = JournalEntryContent.objects.get(entry_id=entry_id, user=request.user)
+            request_data = request.data
+            request_data['entry_id'] = entry_id
+            serializer = JournalEntryContentSerializer(content, data=request_data)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except JournalEntryContent.DoesNotExist:
+            return Response({'detail': 'Journal entry content not found'}, status=status.HTTP_404_NOT_FOUND)
+
+    def patch(self, request, entry_id):
+        try:
+            content = JournalEntryContent.objects.get(entry_id=entry_id, user=request.user)
+            serializer = JournalEntryContentSerializer(content, data=request.data, partial=True)
+            if serializer.is_valid():
+                serializer.save()
+                return Response(serializer.data)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except JournalEntryContent.DoesNotExist:
+            return Response({'detail': 'Journal entry content not found'}, status=status.HTTP_404_NOT_FOUND)
+
 class CreateUserAPIView(APIView):
     def post(self, request):
         form = SignupForm(request.data)  # Replace with your actual form or serializer

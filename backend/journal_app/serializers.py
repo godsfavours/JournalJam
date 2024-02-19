@@ -11,9 +11,9 @@ class UserSerializer(serializers.ModelSerializer):
 class JournalEntrySerializer(serializers.ModelSerializer):
     class Meta:
         model = JournalEntry
-        fields = ['id', 'user', 'last_updated']
+        fields = ['id', 'user', 'last_updated', 'title']
 
 class JournalEntryContentSerializer(serializers.ModelSerializer):
     class Meta:
         model = JournalEntryContent
-        fields = ['id', 'entry', 'user', 'content', 'last_updated']
+        fields = ['id', 'entry_id', 'user', 'content', 'last_updated']

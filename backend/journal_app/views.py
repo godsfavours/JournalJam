@@ -28,9 +28,9 @@ class CreateJournalEntryAPIView(APIView):
         if entry_serializer.is_valid():
             entry_instance = entry_serializer.save(user=request.user)
             entry_id = entry_instance.id
-            if ('content' or 'user' or 'last_updated') not in request.data:
-                return Response({'detail': 'Expect request to have user, content, and last_updated fields.'}, status=status.HTTP_400_BAD_REQUEST)
-            content_serializer = JournalEntryContentSerializer(data = {'user': request.data['user'], 'entry': entry_id, 'content': request.data['content'], 'last_updated': request.data['last_updated']})
+            request_data = request.data
+            request_data['entry_id'] = entry_id
+            content_serializer = JournalEntryContentSerializer(data = request_data, context={'entry': entry_instance})
             if content_serializer.is_valid():
                 content_serializer.save(user=request.user)
                 data = {
@@ -42,6 +42,40 @@ class CreateJournalEntryAPIView(APIView):
                 return Response(content_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response(entry_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        
+class JournalEntryDetailAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, entry_id):
+        entry = JournalEntry.objects.get(pk=entry_id)
+        serializer = JournalEntrySerializer(entry)
+        return Response(serializer.data)
+
+    def delete(self, request, entry_id):
+        entry = JournalEntry.objects.get(pk=entry_id)
+        entry_content = JournalEntryContent.objects.filter(entry_id=entry_id, user=request.user).first()
+
+        if entry_content:
+            entry_content.delete()
+
+        entry.delete()
+        return Response({'detail': 'Journal entry and content deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
+
+    def put(self, request, entry_id):
+        entry = JournalEntry.objects.get(id=entry_id)
+        serializer = JournalEntrySerializer(entry, data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def patch(self, request, entry_id):
+        entry = JournalEntry.objects.get(id=entry_id)
+        serializer = JournalEntrySerializer(entry, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class CreateUserAPIView(APIView):
     def post(self, request):

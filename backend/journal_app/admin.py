@@ -2,7 +2,7 @@ from django.contrib import admin
 from .models import JournalEntry, JournalEntryContent
 
 class JournalAdmin(admin.ModelAdmin):
-    list_display = ('user', 'id', 'last_updated')
+    list_display = ('user', 'id', 'last_updated', 'title')
 
 class JournalContentAdmin(admin.ModelAdmin):
     list_display = ('id', 'entry', 'user', 'content', 'last_updated')

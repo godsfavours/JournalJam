@@ -282,6 +282,7 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
               width: "7px",
             }}
           />
+          {/* START */}
           {/* <Panel minSize={20} defaultSize={70}>
             <Paper
               variant="outlined"
@@ -299,7 +300,7 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
                 </>
               ) : (
                 <>
-                  {/* //Prompt Mid-Panel 
+                   //Prompt Mid-Panel 
                   <Panel
                     minSize={15}
                     defaultSize={10}
@@ -437,92 +438,150 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
               )}
             </Paper>
           </Panel> */}
-          {/* test */}
+
           <Panel minSize={20} defaultSize={70}>
-            <Grid container spacing={2}>
-              <Grid item xs={12}>
-                <Paper //prompt
-                  variant="outlined"
-                  elevation="3"
-                  style={{
-                    color: "#084298",
-                    backgroundColor: "#cfe2ff",
-                    borderColor: "#b6d4fe",
-                    padding: 10,
-                    height: "100%",
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
-                    alignItems: "center",
-                  }}
-                >
-                  {!promptTopCollapsed && (
-                    <Typography variant="subtitle2">
-                      <b>Your Daily Reflection Prompt:</b>
+            {selectedIndex === undefined ? (
+              <>
+                <Button variant="outlined" onClick={handleNewEntry}>
+                  New entry
+                </Button>
+              </>
+            ) : (
+              <Grid container spacing={2}>
+                <Grid item xs={12}>
+                  <Paper //prompt
+                    variant="outlined"
+                    elevation="3"
+                    style={{
+                      color: "#084298",
+                      backgroundColor: "#cfe2ff",
+                      borderColor: "#b6d4fe",
+                      padding: 10,
+                      height: "100%",
+                      display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "center",
+                      alignItems: "center",
+                    }}
+                  >
+                    {!promptTopCollapsed && (
+                      <Typography variant="subtitle2">
+                        <b>Your Daily Reflection Prompt:</b>
+                      </Typography>
+                    )}
+                    <Typography variant="body2">
+                      <i>
+                        You mentioned that you've been feeling lonely. How has
+                        that feeling manifested in your actions today?
+                      </i>
                     </Typography>
-                  )}
-                  <Typography variant="body2">
-                    <i>
-                      You mentioned that you've been feeling lonely. How has
-                      that feeling manifested in your actions today?
-                    </i>
-                  </Typography>
-                  {!promptTopCollapsed ? (
-                    <div
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        justifyContent: "space-between",
-                        alignItems: "center",
-                        borderWidth: "1",
-                        borderColor: "black",
-                      }}
-                    >
-                      <IconButton
-                        aria-label="Minimize"
-                        color="#084298"
-                        onClick={handleCollapsePrompt}
-                      >
-                        <ExpandLessIcon />
-                      </IconButton>
+                    {!promptTopCollapsed ? (
                       <div
                         style={{
                           display: "flex",
                           flexDirection: "row",
-                          justifyContent: "center",
+                          justifyContent: "space-between",
                           alignItems: "center",
+                          borderWidth: "1",
+                          borderColor: "black",
                         }}
                       >
-                        <IconButton>
-                          <RefreshIcon />
+                        <IconButton
+                          aria-label="Minimize"
+                          color="#084298"
+                          onClick={handleCollapsePrompt}
+                        >
+                          <ExpandLessIcon />
                         </IconButton>
-                        <IconButton>
-                          <CloseIcon />
-                        </IconButton>
+                        <div
+                          style={{
+                            display: "flex",
+                            flexDirection: "row",
+                            justifyContent: "center",
+                            alignItems: "center",
+                          }}
+                        >
+                          <IconButton>
+                            <RefreshIcon />
+                          </IconButton>
+                          <IconButton>
+                            <CloseIcon />
+                          </IconButton>
+                        </div>
                       </div>
-                    </div>
-                  ) : (
-                    <IconButton
-                      aria-label="Maximize"
-                      color="#084298"
-                      onClick={handleExpandPrompt}
+                    ) : (
+                      <IconButton
+                        aria-label="Maximize"
+                        color="#084298"
+                        onClick={handleExpandPrompt}
+                      >
+                        <ExpandMoreIcon />
+                      </IconButton>
+                    )}
+                  </Paper>
+                </Grid>
+                <Grid item xs={12}>
+                  <Box
+                    style={{
+                      // display: "flex",
+                      flexDirection: "column",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      // height: "100%",
+                    }}
+                  >
+                    {entryTitle === undefined ? (
+                      <Button variant="outlined" onClick={handleNewEntry}>
+                        New Entry
+                      </Button>
+                    ) : (
+                      <TextField //TITLE
+                        variant="standard"
+                        fullWidth
+                        name="title"
+                        value={entryTitle}
+                        style={{ fontSize: "50px" }}
+                        placeholder="Untitled"
+                        size="medium"
+                        InputProps={{
+                          disableUnderline: true,
+                          style: { fontSize: 20 },
+                        }}
+                        onChange={handleEntryUpdateTitle}
+                        onKeyUp={handleSave}
+                      />
+                    )}
+                    <Box component="form" sx={{ mt: 1 }}>
+                      {entryContent !== undefined && (
+                        <TextField //BODY
+                          variant="standard"
+                          name="content"
+                          fullWidth
+                          multiline
+                          rows={textAreaRows}
+                          value={entryContent}
+                          onChange={handleEntryUpdateContent}
+                          placeholder="What's on your mind?"
+                          autoFocus
+                          onKeyUp={handleSave}
+                          display="flex"
+                        />
+                      )}
+                    </Box>
+                    <Box
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                        alignItems: "center",
+                      }}
+                      sx={{ mt: 1 }}
                     >
-                      <ExpandMoreIcon />
-                    </IconButton>
-                  )}
-                </Paper>
-              </Grid>
-              <Grid item xs={12}>
-                <Box
-                  style={{
-                    display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "space-between",
-                    alignItems: "center",
-                    height: "100%",
-                  }}
-                >
-                  <TextField
+                      {/* <Button variant="outlined">Get AI Prompt</Button> */}
+                      <Typography variant="body2">
+                        {lastSaved ? `Last saved ${lastSaved}` : "Unsaved"}
+                      </Typography>
+                    </Box>
+                    {/* <TextField
                     variant="standard"
                     fullWidth
                     name="content"
@@ -543,11 +602,13 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
                     <Typography variant="body2">
                       Last saved 2 hours ago
                     </Typography>
+                  </Box> */}
                   </Box>
-                </Box>
+                </Grid>
               </Grid>
-            </Grid>
+            )}
           </Panel>
+          {/* Side Prompt Panel */}
           {/* <PanelResizeHandle
             style={{
               width: "7px",

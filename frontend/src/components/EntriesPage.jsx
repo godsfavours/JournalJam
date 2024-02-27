@@ -1,6 +1,7 @@
 // resizable panels: https://react-resizable-panels.vercel.app/
 
 import React, { useEffect, useState, useRef, useReducer } from "react";
+import axios from 'axios';
 import NavBar from "./NavBar";
 import {
   PanelGroup,
@@ -22,7 +23,7 @@ import {
   IconButton,
 } from "@mui/material";
 import useWindowDimensions from "../hooks/useWindowDimensions";
-import { getEntries } from "../fake-db";
+// import { getEntries } from "../fake-db";
 import { useSearchParams } from "react-router-dom";
 import ArrowForwardIosIcon from "@mui/icons-material/ArrowForwardIos";
 import ArrowBackIosNewIcon from "@mui/icons-material/ArrowBackIosNew";
@@ -32,6 +33,7 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 import CloseIcon from "@mui/icons-material/Close";
 import useForceUpdate from "use-force-update";
 import { preventDialogOnCtrlS } from "../utils";
+import Cookies from 'js-cookie';
 
 const MAX_TITLE_LEN = 100;
 const SELECTED_INDEX_KEY = "si";
@@ -57,11 +59,17 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
   const { height, width } = useWindowDimensions();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  useEffect(() => {
-    let e = getEntries();
-
+  const getEntries = async () => {
     /* Get user entries */
-    setEntries(e);
+    let res = await axios.get(`/entries/${user.id}/`);
+    setEntries(res.data);
+  }
+  useEffect(() => {
+    getEntries();
+    // let e = getEntries();
+
+    
+    // setEntries(e);
 
     /* Prevent dialog opening when Ctrl + S is pressed */
     preventDialogOnCtrlS();
@@ -78,7 +86,7 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
     if (!entries[selectedIndex]) return;
     setEntryContent(entries[selectedIndex].content);
     setEntryTitle(entries[selectedIndex].title);
-    setLastSaved(entries[selectedIndex].createdAt.toLocaleString());
+    // setLastSaved(entries[selectedIndex].createdAt.toLocaleString());
   }, [selectedIndex]);
 
   useEffect(() => {
@@ -95,7 +103,7 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
     setSearchParams({ ...searchParams, [SELECTED_INDEX_KEY]: index });
   };
 
-  const handleEntryUpdate = (e, member) => {
+  const handleEntryUpdate = async (e, member, save = false) => {
     e.preventDefault();
 
     const val = e.target.value;
@@ -104,6 +112,7 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
     entries_clone[selectedIndex] = entry;
     setEntries(entries_clone);
 
+    
     // /* Update views */
     if (member === "title") {
       setEntryTitle(val);
@@ -160,21 +169,45 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
     promptPanelRef.current.expand();
   };
 
-  const handleSave = (e) => {
+  const handleSave = async (e) => {
     e.preventDefault();
     if (e.ctrlKey && e.key == "s") {
-      const date = new Date(Date.now()).toLocaleString();
-      e.target.value = date;
-      handleEntryUpdate(e, "createdAt");
+      // const date = new Date(Date.now()).toLocaleString();
+      // e.target.value = date;
+      // handleEntryUpdate(e, "lastUpdated");
+
+      try {
+        console.log(entries[selectedIndex]);
+        if (!entries[selectedIndex].lastUpdated) { /* Create the entry */
+          let res = await axios.post(`/entries/`, {
+            user: user.id,
+            title: entryTitle,
+            content: entryContent
+          },{headers: {
+            'X-CSRFTOKEN': Cookies.get('csrftoken'),
+          }});
+          // console.log(res);
+          const date = new Date(res.data.entry_data.last_updated);
+          console.log(date);
+          e.target.value = date;
+          handleEntryUpdate(e, "lastUpdated");
+          // setEntries(res.data);
+        } 
+
+      } catch {
+  
+      } finally {
+  
+      }
     }
   };
 
   const handleNewEntry = (e) => {
     e?.preventDefault();
-    const newEntry = { title: "Untitled", content: "", createdAt: new Date() };
+    const newEntry = { title: "Untitled", content: "", lastUpdated: undefined };
     setEntryTitle(newEntry.title);
     setEntryContent(newEntry.content);
-    setLastSaved(newEntry.createdAt.toLocaleString());
+    setLastSaved(undefined);
     let newEntries = [newEntry].concat(entries);
     setEntries(newEntries);
     setSearchParams({ ...searchParams, [SELECTED_INDEX_KEY]: 0 });
@@ -254,6 +287,8 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
                   }}
                 >
                   {entries &&
+                    entries.length > 0 ? 
+                    (
                     entries.map((entry, i) => (
                       <ListItemButton
                         sx={{ width: "100%" }}
@@ -272,7 +307,11 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
                           }
                         />
                       </ListItemButton>
-                    ))}
+                    )
+                    )) : 
+                    (<>No Entries</>)
+                    
+                  }
                 </List>
               )}
             </Paper>

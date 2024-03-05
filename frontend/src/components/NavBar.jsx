@@ -1,36 +1,34 @@
-import axios from 'axios';
-import React, { useEffect, useState } from 'react'
-import AppBar from '@mui/material/AppBar';
-import Toolbar from '@mui/material/Toolbar';
-import Typography from '@mui/material/Typography';
-import IconButton from '@mui/material/IconButton';
-import MenuIcon from '@mui/icons-material/Menu';
-import MenuItem from '@mui/material/MenuItem';
-import Menu from '@mui/material/Menu';
-import Cookies from 'js-cookie';
-import Button from '@mui/material/Button';
+import axios from "axios";
+import React, { useEffect, useState } from "react";
+import AppBar from "@mui/material/AppBar";
+import Toolbar from "@mui/material/Toolbar";
+import Typography from "@mui/material/Typography";
+import IconButton from "@mui/material/IconButton";
+import MenuIcon from "@mui/icons-material/Menu";
+import MenuItem from "@mui/material/MenuItem";
+import Menu from "@mui/material/Menu";
+import Cookies from "js-cookie";
+import Button from "@mui/material/Button";
 
 const NavBar = ({ theme, user, toggleTheme, onNewEntry }) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [modeText, setModeText] = useState(null);
 
   useEffect(() => {
-    setModeText(
-      `${theme === 'dark' ? 'Light' : 'Dark'} mode`);
+    setModeText(`${theme === "dark" ? "Light" : "Dark"} mode`);
   }, [theme]);
 
   const onSignOut = async (e) => {
     e.preventDefault();
     try {
-      await axios.post('/api/logout/', null, {
+      await axios.post("/api/logout/", null, {
         headers: {
-          'X-CSRFTOKEN': Cookies.get('csrftoken'),
-        }
+          "X-CSRFTOKEN": Cookies.get("csrftoken"),
+        },
       });
-      window.location.pathname = '/login';
-    } catch (error) {
-    }
-  }
+      window.location.pathname = "/login";
+    } catch (error) {}
+  };
 
   const handleOpenMenu = (e) => {
     setAnchorEl(e.currentTarget);
@@ -41,21 +39,22 @@ const NavBar = ({ theme, user, toggleTheme, onNewEntry }) => {
   };
 
   return (
-    <AppBar color="default" position="static" style={{
-      backgroundColor: theme === 'dark' ? '' : 'white',
-      // borderBottom: theme === 'light' ? '2px solid lightgrey' : '',
-    }} elevation={0}>
+    <AppBar
+      color="default"
+      position="static"
+      style={{
+        backgroundColor: theme === "dark" ? "" : "white",
+        // borderBottom: theme === 'light' ? '2px solid lightgrey' : '',
+      }}
+      elevation={0}
+    >
       <Toolbar>
-        <Typography
-          variant="h6"
-          component="div"
-          sx={{ flexGrow: 1 }}>
+        <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
           Journal Jam
         </Typography>
-        <Button
-          variant="outlined"
-          onClick={onNewEntry}
-        >New Entry</Button>
+        <Button variant="outlined" onClick={onNewEntry}>
+          New Entry
+        </Button>
         <IconButton
           size="large"
           aria-label="account of current user"
@@ -70,26 +69,24 @@ const NavBar = ({ theme, user, toggleTheme, onNewEntry }) => {
           id="menu-appbar"
           anchorEl={anchorEl}
           anchorOrigin={{
-            vertical: 'top',
-            horizontal: 'right',
+            vertical: "top",
+            horizontal: "right",
           }}
           keepMounted
           transformOrigin={{
-            vertical: 'top',
-            horizontal: 'right',
+            vertical: "top",
+            horizontal: "right",
           }}
           open={Boolean(anchorEl)}
           onClose={handleCloseMenu}
         >
-          <MenuItem onClick={toggleTheme}>
-            {modeText}
-          </MenuItem>
+          <MenuItem onClick={toggleTheme}>{modeText}</MenuItem>
           <MenuItem onClick={handleCloseMenu}>My Account</MenuItem>
           <MenuItem onClick={onSignOut}>Sign out</MenuItem>
         </Menu>
       </Toolbar>
     </AppBar>
-  )
-}
+  );
+};
 
-export default NavBar
+export default NavBar;

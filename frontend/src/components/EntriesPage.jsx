@@ -1,7 +1,7 @@
 // resizable panels: https://react-resizable-panels.vercel.app/
 
 import React, { useEffect, useState, useRef, useReducer } from "react";
-import axios from 'axios';
+import axios from "axios";
 import NavBar from "./NavBar";
 import {
   PanelGroup,
@@ -33,7 +33,7 @@ import RefreshIcon from "@mui/icons-material/Refresh";
 import CloseIcon from "@mui/icons-material/Close";
 import useForceUpdate from "use-force-update";
 import { preventDialogOnCtrlS } from "../utils";
-import Cookies from 'js-cookie';
+import Cookies from "js-cookie";
 
 const MAX_TITLE_LEN = 100;
 const SELECTED_INDEX_KEY = "si";
@@ -63,12 +63,11 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
     /* Get user entries */
     let res = await axios.get(`/entries/${user.id}/`);
     setEntries(res.data);
-  }
+  };
   useEffect(() => {
     getEntries();
     // let e = getEntries();
 
-    
     // setEntries(e);
 
     /* Prevent dialog opening when Ctrl + S is pressed */
@@ -112,7 +111,6 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
     entries_clone[selectedIndex] = entry;
     setEntries(entries_clone);
 
-    
     // /* Update views */
     if (member === "title") {
       setEntryTitle(val);
@@ -178,26 +176,30 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
 
       try {
         console.log(entries[selectedIndex]);
-        if (!entries[selectedIndex].lastUpdated) { /* Create the entry */
-          let res = await axios.post(`/entries/`, {
-            user: user.id,
-            title: entryTitle,
-            content: entryContent
-          },{headers: {
-            'X-CSRFTOKEN': Cookies.get('csrftoken'),
-          }});
+        if (!entries[selectedIndex].lastUpdated) {
+          /* Create the entry */
+          let res = await axios.post(
+            `/entries/`,
+            {
+              user: user.id,
+              title: entryTitle,
+              content: entryContent,
+            },
+            {
+              headers: {
+                "X-CSRFTOKEN": Cookies.get("csrftoken"),
+              },
+            }
+          );
           // console.log(res);
           const date = new Date(res.data.entry_data.last_updated);
           console.log(date);
           e.target.value = date;
           handleEntryUpdate(e, "lastUpdated");
           // setEntries(res.data);
-        } 
-
+        }
       } catch {
-  
       } finally {
-  
       }
     }
   };
@@ -286,9 +288,7 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
                     overflow: "auto",
                   }}
                 >
-                  {entries &&
-                    entries.length > 0 ? 
-                    (
+                  {entries && entries.length > 0 ? (
                     entries.map((entry, i) => (
                       <ListItemButton
                         sx={{ width: "100%" }}
@@ -307,11 +307,10 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
                           }
                         />
                       </ListItemButton>
-                    )
-                    )) : 
-                    (<>No Entries</>)
-                    
-                  }
+                    ))
+                  ) : (
+                    <>No Entries</>
+                  )}
                 </List>
               )}
             </Paper>

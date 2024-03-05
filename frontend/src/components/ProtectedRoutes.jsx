@@ -1,9 +1,9 @@
 // Verifies a user’s permissions and authentication status to allow access to
 // certain routes.
 
-import React, { useEffect, useState } from 'react'
-import { Outlet, Navigate, useLocation } from 'react-router-dom'
-import axios from 'axios'
+import React, { useEffect, useState } from "react";
+import { Outlet, Navigate, useLocation } from "react-router-dom";
+import axios from "axios";
 
 const ProtectedRoutes = ({ component: Component, setUser }) => {
   const [isAuth, setIsAuth] = useState(false);
@@ -14,7 +14,7 @@ const ProtectedRoutes = ({ component: Component, setUser }) => {
     const checkAuth = async () => {
       setLoaded(false);
       try {
-        const res = await axios.get('/api/current_user/');
+        const res = await axios.get("/api/current_user/");
         setUser(res.data);
         setIsAuth(true);
       } catch (error) {

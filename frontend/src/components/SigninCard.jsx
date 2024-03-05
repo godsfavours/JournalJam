@@ -1,18 +1,18 @@
-import React, { useState, useRef } from 'react';
-import axios from 'axios';
-import TextField from '@mui/material/TextField';
-import Link from '@mui/material/Link';
-import Box from '@mui/material/Box';
-import Typography from '@mui/material/Typography';
-import Container from '@mui/material/Container';
-import Alert from '@mui/material/Alert';
-import IconButton from '@mui/material/IconButton';
-import Collapse from '@mui/material/Collapse';
-import CloseIcon from '@mui/icons-material/Close';
-import { LoadingButton } from '@mui/lab';
-import Cookies from 'js-cookie';
+import React, { useState, useRef } from "react";
+import axios from "axios";
+import TextField from "@mui/material/TextField";
+import Link from "@mui/material/Link";
+import Box from "@mui/material/Box";
+import Typography from "@mui/material/Typography";
+import Container from "@mui/material/Container";
+import Alert from "@mui/material/Alert";
+import IconButton from "@mui/material/IconButton";
+import Collapse from "@mui/material/Collapse";
+import CloseIcon from "@mui/icons-material/Close";
+import { LoadingButton } from "@mui/lab";
+import Cookies from "js-cookie";
 
-import '../App.css';
+import "../App.css";
 
 const SigninCard = () => {
   const [username, setUsername] = useState("");
@@ -36,18 +36,22 @@ const SigninCard = () => {
     } else {
       setSigningIn(true);
       try {
-        await axios.post('/api/login/', {
-          username,
-          password
-        }, {
-          headers: {
-            'X-CSRFTOKEN': Cookies.get('csrftoken'),
+        await axios.post(
+          "/api/login/",
+          {
+            username,
+            password,
           },
-        });
-        window.location.pathname = '/';
+          {
+            headers: {
+              "X-CSRFTOKEN": Cookies.get("csrftoken"),
+            },
+          }
+        );
+        window.location.pathname = "/";
       } catch (error) {
         if (error.response.status === 401) {
-          setError('Could not find a user with that username and password.');
+          setError("Could not find a user with that username and password.");
         } else {
           setError(error.message);
         }
@@ -55,33 +59,33 @@ const SigninCard = () => {
         setSigningIn(false);
       }
     }
-  }
+  };
 
   const handleUsernameChange = (e) => {
     e.preventDefault();
     setUsernameInvalid("");
     setUsername(e.target.value);
-  }
+  };
 
   const handlePasswordChange = (e) => {
     e.preventDefault();
     setPasswordInvalid("");
     setPassword(e.target.value);
-  }
+  };
 
   return (
     <Container component="main" maxWidth="xs">
       <Box
         sx={{
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
         }}
       >
         <Typography component="h1" variant="h5">
           Sign into Journal Jam
         </Typography>
-        <Collapse sx={{ mt: 1, width: '100%' }} in={!!error}>
+        <Collapse sx={{ mt: 1, width: "100%" }} in={!!error}>
           <Alert
             severity="error"
             action={
@@ -141,15 +145,22 @@ const SigninCard = () => {
               Forgot password?
             </Link>
           </Box> */}
-          <Box sx={{ mt: 2, width: '100%', display: 'flex', justifyContent: 'center' }}>
+          <Box
+            sx={{
+              mt: 2,
+              width: "100%",
+              display: "flex",
+              justifyContent: "center",
+            }}
+          >
             <Link href={`/signup?un=${username}`} variant="body">
               Create an account
             </Link>
           </Box>
         </Box>
       </Box>
-    </Container >
+    </Container>
   );
-}
+};
 
-export default SigninCard
+export default SigninCard;

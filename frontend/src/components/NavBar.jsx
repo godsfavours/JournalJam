@@ -57,8 +57,8 @@ const NavBar = ({ theme, user, toggleTheme, onNewEntry }) => {
         </Button>
         <IconButton
           size="large"
-          aria-label="account of current user"
-          aria-controls="menu-appbar"
+          aria-label="Nav Bar Actions"
+          aria-controls="menu-navbar"
           aria-haspopup="true"
           onClick={handleOpenMenu}
           color="inherit"
@@ -66,7 +66,7 @@ const NavBar = ({ theme, user, toggleTheme, onNewEntry }) => {
           <MenuIcon />
         </IconButton>
         <Menu
-          id="menu-appbar"
+          id="menu-navbar"
           anchorEl={anchorEl}
           anchorOrigin={{
             vertical: "top",

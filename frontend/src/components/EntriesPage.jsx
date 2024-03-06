@@ -157,7 +157,7 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
         <PanelGroup
           autoSaveId="persistence"
           direction="horizontal"
-          style={{ height: "100%", minHeight: "100vh" }}
+          style={{ height: "100%", minHeight: `${panelHeight}px` }}
         >
           {/* Journal Entries Panel */}
           <Panel
@@ -175,9 +175,9 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
             <Paper
               variant="outlined"
               style={{
-                // minHeight: `${panelHeight}px`,
+                minHeight: `${panelHeight}px`,
                 // maxHeight: `${panelHeight}px`,
-                height: "100%",
+                // height: "100%",
               }}
             >
               <Box sx={{ p: 2 }}>
@@ -233,7 +233,7 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
               variant="outlined"
               style={{
                 height: "100%",
-                // maxHeight: `${panelHeight}px`,
+                minHeight: `${panelHeight}px`,
               }}
             >
               {selectedIndex === undefined ? (

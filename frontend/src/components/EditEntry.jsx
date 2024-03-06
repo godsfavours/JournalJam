@@ -21,6 +21,11 @@ import AccordionActions from "@mui/material/AccordionActions";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
+import Dialog from "@mui/material/Dialog";
+import DialogActions from "@mui/material/DialogActions";
+import DialogContent from "@mui/material/DialogContent";
+import DialogContentText from "@mui/material/DialogContentText";
+import DialogTitle from "@mui/material/DialogTitle";
 
 const MAX_TITLE_LEN = 100;
 const UNSAVED_MSG =
@@ -49,6 +54,9 @@ const EditEntry = forwardRef(
     const [initialTitle, setInitialTitle] = useState(undefined);
     const [menuAnchorEl, setMenuAnchorEl] = useState(null);
     const [saving, setSaving] = useState(false);
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [dialogMessage, setDialogMessage] = useState("");
+    const [dialogDescription, setDialogDescription] = useState("");
 
     const { height } = useWindowDimensions();
     const [searchParams, setSearchParams] = useSearchParams();
@@ -140,13 +148,7 @@ const EditEntry = forwardRef(
           }
         );
 
-        console.log(res);
-
-        /* Update the entry title in side bar */
-        let entries_clone = [...entries];
-        let entry = { ...entries[selectedIndex], title: res.data.title };
-        entries_clone[selectedIndex] = entry;
-        updateEntries(entries_clone);
+        setInitialTitle(entryTitle);
 
         return res.data.last_updated;
       } catch (e) {
@@ -171,7 +173,8 @@ const EditEntry = forwardRef(
           }
         );
 
-        console.log(res);
+        setInitialContent(entryContent);
+
         return res.data.last_updated;
       } catch (e) {
         /* TODO: handle errors. Use https://mui.com/material-ui/react-alert/ */
@@ -188,7 +191,7 @@ const EditEntry = forwardRef(
           const titleLastUpdated = await saveTitle();
           const contentLastUpdated = await saveContent();
 
-          console.log(titleLastUpdated, contentLastUpdated);
+          if (!titleLastUpdated && !contentLastUpdated) return;
 
           setLastSaved(
             titleLastUpdated && contentLastUpdated
@@ -203,8 +206,15 @@ const EditEntry = forwardRef(
           );
 
           setDirty(false);
-          setInitialTitle(entryTitle);
-          setInitialContent(entryContent);
+
+          /* Update the entry title in side bar */
+          let entries_clone = [...entries];
+          let entry = { ...entries[selectedIndex], title: entryTitle };
+          entries_clone.splice(selectedIndex, 1);
+          entries_clone.unshift(entry);
+          updateEntries(entries_clone);
+
+          setSearchParams({ ...searchParams, si: 0 });
         } catch (e) {
           /* TODO: handle errors. Use https://mui.com/material-ui/react-alert/ */
         } finally {
@@ -215,42 +225,47 @@ const EditEntry = forwardRef(
       save();
     };
 
+    const deleteEntry = async () => {
+      try {
+        setLoading(true);
+
+        const res = await axios.delete(
+          `/api/entries/${entries[selectedIndex].id}/`,
+          {
+            headers: {
+              "X-CSRFTOKEN": Cookies.get("csrftoken"),
+            },
+          }
+        );
+
+        /* Remove entry from list */
+        let entries_clone = [...entries];
+        entries_clone.splice(selectedIndex, 1);
+        updateEntries(entries_clone);
+
+        handleCloseEntry();
+      } catch (e) {
+        /* TODO: handle errors. Use https://mui.com/material-ui/react-alert/ */
+      } finally {
+        setLoading(false);
+      }
+    };
+
     const handleDelete = (e) => {
       e.preventDefault();
       handleCloseMenu(e);
 
-      const deleteEntry = async () => {
-        try {
-          setLoading(true);
-
-          const res = await axios.delete(
-            `/api/entries/${entries[selectedIndex].id}/`,
-            {
-              headers: {
-                "X-CSRFTOKEN": Cookies.get("csrftoken"),
-              },
-            }
-          );
-
-          /* Remove entry from list */
-          let entries_clone = [...entries];
-          entries_clone.splice(selectedIndex, 1);
-          updateEntries(entries_clone);
-
-          handleCloseEntry();
-        } catch (e) {
-          /* TODO: handle errors. Use https://mui.com/material-ui/react-alert/ */
-        } finally {
-          setLoading(false);
-        }
-      };
-
-      deleteEntry();
+      setDialogMessage("Are you sure you want to delete this journal entry?");
+      setDialogDescription(
+        `The journal entry "${initialTitle}" will be deleted. Please confirm this. `
+      );
+      setDialogOpen(true);
     };
 
     const handleCloseEntry = (e) => {
       e?.preventDefault();
 
+      expandJournalEntries();
       const newSearchParams = searchParams;
       searchParams.delete("si");
       setSearchParams(newSearchParams);
@@ -262,6 +277,12 @@ const EditEntry = forwardRef(
 
     const handleCloseMenu = () => {
       setMenuAnchorEl(null);
+    };
+
+    const handleDialogClose = (e) => {
+      e.preventDefault();
+
+      setDialogOpen(false);
     };
 
     const handleGetAIPrompt = () => {};
@@ -281,9 +302,13 @@ const EditEntry = forwardRef(
       );
 
     return (
-      <>
+      <React.Fragment>
         {/* For preventing navigating away with unsaved changes */}
-        <Prompt when={dirty} message={UNSAVED_MSG} beforeUnload={true} />
+        <Prompt
+          when={!saving && dirty}
+          message={UNSAVED_MSG}
+          beforeUnload={true}
+        />
 
         <Box sx={{ p: 1, display: "flex", alignItems: "center" }}>
           {/* Entry Title */}
@@ -294,7 +319,7 @@ const EditEntry = forwardRef(
             sx={{ ml: 1 }}
             value={entryTitle}
             style={{ fontSize: "50px" }}
-            placeholder="Untitled"
+            placeholder="Name your journal entry"
             size="large"
             InputProps={{
               disableUnderline: true,
@@ -368,7 +393,7 @@ const EditEntry = forwardRef(
 
         <Box sx={{ m: 2 }}>
           {/* Consider using an accordion, or implement the prompt panel again */}
-          <Accordion variant="outlined" defaultExpanded>
+          {/* <Accordion variant="outlined" defaultExpanded>
             <AccordionSummary
               expandIcon={<ExpandMoreIcon />}
               aria-controls="panel3-content"
@@ -385,7 +410,7 @@ const EditEntry = forwardRef(
               <Button>Cancel</Button>
               <Button>Agree</Button>
             </AccordionActions>
-          </Accordion>
+          </Accordion> */}
         </Box>
 
         {/* Entry content editing box */}
@@ -396,7 +421,7 @@ const EditEntry = forwardRef(
               name="content"
               fullWidth
               multiline
-              minRows={5}
+              minRows={10}
               // rows={textAreaRows}
               value={entryContent}
               onChange={handleEntryUpdateContent}
@@ -433,8 +458,22 @@ const EditEntry = forwardRef(
               </LoadingButton>
             </Box>
           </Box>
+          <Dialog open={dialogOpen} onClose={handleDialogClose}>
+            <DialogTitle id="alert-dialog-title">{dialogMessage}</DialogTitle>
+            <DialogContent>
+              <DialogContentText id="alert-dialog-description">
+                {dialogDescription}
+              </DialogContentText>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleDialogClose}>Cancel</Button>
+              <Button onClick={deleteEntry} autoFocus>
+                Delete
+              </Button>
+            </DialogActions>
+          </Dialog>
         </Box>
-      </>
+      </React.Fragment>
     );
   }
 );

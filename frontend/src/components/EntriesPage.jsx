@@ -26,7 +26,8 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
   const [panelHeight, setPanelHeight] = useState(undefined);
   const [entries, setEntries] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(undefined);
-  const [entryListMaxTitleLen, setEntryListMaxTitleLen] = useState(10);
+  const [journalEntriesPanelWidthPx, setJournalEntriesPanelWidthPx] =
+    useState(10);
   const [journalEntriesCollapsed, setJournalEntriesCollapsed] = useState(false);
 
   const journalEntriesPanelRef = useRef();
@@ -34,6 +35,13 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
 
   const { height, width } = useWindowDimensions();
   const [searchParams, setSearchParams] = useSearchParams();
+
+  // create a new canvas element
+  const canvas = document.createElement("canvas");
+  const ctx = canvas.getContext("2d");
+
+  // set the font size and type
+  ctx.font = "16px Arial";
 
   useEffect(() => {
     const getEntries = async () => {
@@ -88,9 +96,8 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
   in the entries panel as the width of the panel changes. */
   const onResizeJournalEntries = () => {
     const size = journalEntriesPanelRef.current.getSize();
-    const journalEntriesPanelWidthPx = width * (size / 100) - 60;
-    const len = journalEntriesPanelWidthPx * 0.12 - 0.9;
-    setEntryListMaxTitleLen(Math.max(len, 10));
+    const w = width * (size / 100) - 60;
+    setJournalEntriesPanelWidthPx(w);
   };
 
   /* Creates a new entry. */
@@ -136,6 +143,24 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
     createEntry();
   };
 
+  const getDisplayedEntryTitle = (title) => {
+    if (!title || journalEntriesCollapsed) return undefined;
+
+    const getCutoffString = (str) => {
+      while (true) {
+        if (
+          ctx.measureText(str).width <=
+          Math.max(journalEntriesPanelWidthPx - 15, 0)
+        )
+          return str;
+        str = str.slice(0, -1);
+      }
+    };
+
+    const cutOff = getCutoffString(title);
+    return cutOff !== title ? `${cutOff}...` : title;
+  };
+
   return (
     <Box style={{ display: "flex", flexDirection: "column" }}>
       {/* Navigation Bar */}
@@ -177,7 +202,7 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
               style={{
                 minHeight: `${panelHeight}px`,
                 // maxHeight: `${panelHeight}px`,
-                // height: "100%",
+                height: "100%",
               }}
             >
               <Box sx={{ p: 2 }}>
@@ -202,14 +227,7 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
                       onClick={(e) => handleJournalEntrySelected(e, i)}
                     >
                       <ListItemText
-                        primary={
-                          entry?.title.length > entryListMaxTitleLen
-                            ? `${entry.title.substring(
-                                0,
-                                entryListMaxTitleLen
-                              )}...`
-                            : entry?.title
-                        }
+                        primary={getDisplayedEntryTitle(entry?.title)}
                       />
                     </ListItemButton>
                   ))

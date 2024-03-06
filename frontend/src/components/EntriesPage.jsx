@@ -230,7 +230,6 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
           />
           <Panel minSize={20} defaultSize={75}>
             <Paper
-              /*test*/
               variant="outlined"
               style={{
                 height: "100%",

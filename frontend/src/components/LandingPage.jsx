@@ -8,13 +8,33 @@ import Paper from "@mui/material/Paper";
 import Grid from "@mui/material/Unstable_Grid2";
 import Typography from "@mui/material/Typography";
 
+const APP_NAME = "Journal Jam";
+const APP_DESC =
+  "An AI-powered journaling platform to take your journaling experience to the next level.";
+
 const LandingPage = () => {
   let location = useLocation();
   const [loaded, setLoaded] = useState(false);
   const [showLogin, setShowLogin] = useState(true);
   const [isAuth, setIsAuth] = useState(false);
+  const [appName, setAppName] = useState("");
+  const [appDesc, setAppDesc] = useState("");
 
   useEffect(() => {
+    const letters = APP_NAME.split("");
+
+    const printLetters = async () => {
+      for (let i = 0; i < letters.length; i++) {
+        await new Promise((r) => setTimeout(r, 100));
+        setAppName((prev) => prev + letters[i]);
+      }
+      await new Promise((r) => setTimeout(r, 500));
+      setAppDesc(APP_DESC);
+    };
+    printLetters();
+  }, []);
+
+  useEffect(async () => {
     const checkAuth = async () => {
       setLoaded(false);
       try {
@@ -26,7 +46,7 @@ const LandingPage = () => {
         setLoaded(true);
       }
     };
-    checkAuth();
+    await checkAuth();
 
     setShowLogin(location.pathname === "/login");
   }, [location]);
@@ -51,13 +71,8 @@ const LandingPage = () => {
             justifyContent: "center",
           }}
         >
-          <Typography variant="h1">Journal Jam</Typography>
-          <Typography variant="body1">
-            Lorem ipsum dolor sit amet, consectetur adipisicing elit. Quaerat
-            nemo blanditiis est doloremque illum suscipit praesentium optio
-            error temporibus quidem, illo iste deserunt quis officiis
-            consequuntur voluptatum, culpa qui maxime?
-          </Typography>
+          <Typography variant="h1">{appName}</Typography>
+          <Typography variant="body1">{appDesc}</Typography>
         </Box>
       </Grid>
       <Grid xs={6}>

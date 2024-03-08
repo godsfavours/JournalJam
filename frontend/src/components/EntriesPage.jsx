@@ -260,7 +260,11 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
               </Button>
             ) : (
               <Box sx={{ display: "flex", justifyContent: "center" }}>
-                <IconButton size="large" color="primary">
+                <IconButton
+                  onClick={handleNewEntry}
+                  size="large"
+                  color="primary"
+                >
                   <EditNoteIcon />
                 </IconButton>
               </Box>

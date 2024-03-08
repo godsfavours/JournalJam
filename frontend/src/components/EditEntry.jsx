@@ -68,10 +68,15 @@ const EditEntry = forwardRef(
           setInitialContent(res.data.content);
           setEntryTitle(entries[selectedIndex].title);
           setInitialTitle(entries[selectedIndex].title);
-          setLastSaved(
+
+          let updated =
             entries[selectedIndex].last_updated < res.data.last_updated
               ? res.data.last_updated
-              : entries[selectedIndex].last_updated
+              : entries[selectedIndex].last_updated;
+          let date = new Date(updated);
+          // `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+          setLastSaved(
+            `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`
           );
 
           /* Used to prevent the user from leaving the page with unsaved changes. */
@@ -96,7 +101,10 @@ const EditEntry = forwardRef(
         setEntryTitle(entry.title);
         setInitialTitle(entry.title);
 
-        setLastSaved(entry.last_updated);
+        let date = new Date(entry.last_updated);
+        setLastSaved(
+          `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`
+        );
         setDirty(false);
       },
     }));
@@ -197,16 +205,21 @@ const EditEntry = forwardRef(
 
           if (!titleLastUpdated && !contentLastUpdated) return;
 
-          setLastSaved(
-            titleLastUpdated && contentLastUpdated
-              ? titleLastUpdated < contentLastUpdated
+          let updated;
+          if (titleLastUpdated && contentLastUpdated) {
+            updated =
+              titleLastUpdated < contentLastUpdated
                 ? contentLastUpdated
-                : titleLastUpdated
-              : titleLastUpdated
-              ? titleLastUpdated
-              : contentLastUpdated
-              ? contentLastUpdated
-              : lastSaved
+                : titleLastUpdated;
+          } else if (titleLastUpdated) {
+            updated = titleLastUpdated;
+          } else {
+            updated = contentLastUpdated;
+          }
+
+          let date = new Date(updated);
+          setLastSaved(
+            `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`
           );
 
           setDirty(false);

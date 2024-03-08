@@ -2,8 +2,6 @@
 
 import React, { useEffect, useState, useRef, useReducer } from "react";
 import axios from "axios";
-import NavBar from "./NavBar";
-import Divider from "@mui/material/Divider";
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
 import {
   Grid,
@@ -12,13 +10,25 @@ import {
   Typography,
   Button,
   List,
+  ListItem,
+  ListItemIcon,
   ListItemButton,
   ListItemText,
+  Icon,
 } from "@mui/material";
 import useWindowDimensions from "../hooks/useWindowDimensions";
 import { useSearchParams } from "react-router-dom";
 import Cookies from "js-cookie";
 import EditEntry from "./EditEntry";
+import IconButton from "@mui/material/IconButton";
+import MenuIcon from "@mui/icons-material/Menu";
+import EditNoteIcon from "@mui/icons-material/EditNote";
+import Tooltip from "@mui/material/Tooltip";
+import LightModeIcon from "@mui/icons-material/LightMode";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
+import LogoutIcon from "@mui/icons-material/Logout";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
 
 const SELECTED_INDEX_KEY = "si";
 
@@ -28,7 +38,7 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
   const [selectedIndex, setSelectedIndex] = useState(undefined);
   const [journalEntriesPanelWidthPx, setJournalEntriesPanelWidthPx] =
     useState(10);
-  const [journalEntriesCollapsed, setJournalEntriesCollapsed] = useState(false);
+  const [leftPanelCollapsed, setleftPanelCollapsed] = useState(true);
 
   const journalEntriesPanelRef = useRef();
   const editEntryContentRef = useRef();
@@ -36,11 +46,9 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
   const { height, width } = useWindowDimensions();
   const [searchParams, setSearchParams] = useSearchParams();
 
-  // create a new canvas element
+  // Used for figuring out how to cut off the journal entry titles in the left panel.
   const canvas = document.createElement("canvas");
   const ctx = canvas.getContext("2d");
-
-  // set the font size and type
   ctx.font = "16px Arial";
 
   useEffect(() => {
@@ -82,19 +90,26 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
     setSearchParams({ ...searchParams, [SELECTED_INDEX_KEY]: index });
   };
 
-  const handleCollapseJournalEntries = () => {
-    setJournalEntriesCollapsed(true);
+  const handleExpandLeftPanel = () => {
+    setleftPanelCollapsed(false);
+    journalEntriesPanelRef.current.expand();
+  };
+
+  const handleCollapseLeftPanel = () => {
+    setleftPanelCollapsed(true);
     journalEntriesPanelRef.current.collapse();
   };
 
-  const handleExpandJournalEntries = () => {
-    setJournalEntriesCollapsed(false);
-    journalEntriesPanelRef.current.expand();
+  const toggleLeftPanelCollapsed = () => {
+    const collapsed = !leftPanelCollapsed;
+    setleftPanelCollapsed(collapsed);
+    if (collapsed) journalEntriesPanelRef.current.collapse();
+    else journalEntriesPanelRef.current.expand();
   };
 
   /* Updates the max length of the journal entry titles displayed 
   in the entries panel as the width of the panel changes. */
-  const onResizeJournalEntries = () => {
+  const onLeftPanelResize = () => {
     const size = journalEntriesPanelRef.current.getSize();
     const w = width * (size / 100) - 60;
     setJournalEntriesPanelWidthPx(w);
@@ -143,8 +158,20 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
     createEntry();
   };
 
+  const handleSignOut = async (e) => {
+    e.preventDefault();
+    try {
+      await axios.post("/api/logout/", null, {
+        headers: {
+          "X-CSRFTOKEN": Cookies.get("csrftoken"),
+        },
+      });
+      window.location.pathname = "/login";
+    } catch (error) {}
+  };
+
   const getDisplayedEntryTitle = (title) => {
-    if (!title || journalEntriesCollapsed) return undefined;
+    if (!title || leftPanelCollapsed) return undefined;
 
     const getCutoffString = (str) => {
       while (true) {
@@ -162,139 +189,239 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
   };
 
   return (
-    <Box style={{ display: "flex", flexDirection: "column" }}>
-      {/* Navigation Bar */}
-      <NavBar
-        user={user}
-        theme={theme}
-        toggleTheme={toggleTheme}
-        onNewEntry={handleNewEntry}
-      />
-      {/* Main Panels */}
-      <Box
-        sx={{
-          ml: 3,
-          mr: 3,
-          mb: 1,
-          flexGrow: 1,
-        }}
+    <Box
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        height: "100vh",
+      }}
+    >
+      <PanelGroup
+        autoSaveId="persistence"
+        direction="horizontal"
+        style={{ flexGrow: 1 }}
       >
-        <PanelGroup
-          autoSaveId="persistence"
-          direction="horizontal"
-          style={{ height: "100%", minHeight: `${panelHeight}px` }}
+        {/* Left Panel */}
+        <Panel
+          minSize={10}
+          defaultSize={25}
+          maxSize={40}
+          collapsible={true}
+          collapsedSize={5}
+          onCollapse={handleCollapseLeftPanel}
+          onExpand={handleExpandLeftPanel}
+          onResize={onLeftPanelResize}
+          ref={journalEntriesPanelRef}
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            backgroundColor: theme === "dark" ? "#1a1a1a" : "#fafafa",
+          }}
         >
-          {/* Journal Entries Panel */}
-          <Panel
-            minSize={15}
-            defaultSize={25}
-            maxSize={40}
-            collapsible={selectedIndex && true}
-            collapsedSize={0}
-            onCollapse={handleCollapseJournalEntries}
-            onExpand={handleExpandJournalEntries}
-            onResize={onResizeJournalEntries}
-            ref={journalEntriesPanelRef}
-            sx={{ height: "100%" }}
-          >
-            <Paper
-              variant="outlined"
-              style={{
-                minHeight: `${panelHeight}px`,
-                // maxHeight: `${panelHeight}px`,
-                height: "100%",
-              }}
-            >
-              <Box sx={{ p: 2 }}>
-                <Typography sx={{ flexGrow: 1 }} variant="h6">
-                  Entries
-                </Typography>
-              </Box>
-              <Divider />
-              <List
-                style={{
-                  height: "100%",
-                  maxHeight: `${panelHeight}px`,
-                  overflow: "auto",
-                }}
-              >
-                {entries.length > 0 ? (
-                  entries.map((entry, i) => (
-                    <ListItemButton
-                      sx={{ width: "100%" }}
-                      key={i}
-                      selected={selectedIndex === i.toString()}
-                      onClick={(e) => handleJournalEntrySelected(e, i)}
-                    >
-                      <ListItemText
-                        primary={getDisplayedEntryTitle(entry?.title)}
-                      />
-                    </ListItemButton>
-                  ))
-                ) : (
-                  <Box sx={{ display: "flex", justifyContent: "center", p: 2 }}>
-                    <Typography variant="body">
-                      No journal entries to display.
-                    </Typography>
-                  </Box>
-                )}
-              </List>
-            </Paper>
-          </Panel>
-          <PanelResizeHandle
-            style={{
-              width: "7px",
-            }}
-          />
-          <Panel minSize={20} defaultSize={75}>
-            <Paper
-              variant="outlined"
-              style={{
-                height: "100%",
-                minHeight: `${panelHeight}px`,
-              }}
-            >
-              {selectedIndex === undefined ? (
-                <Box
-                  sx={{
-                    width: "100%",
-                    height: "100%",
+          <Box
+            sx={
+              leftPanelCollapsed
+                ? { display: "flex", justifyContent: "center", mt: 2 }
+                : {
+                    m: 2,
                     display: "flex",
-                    flexDirection: "column",
-                    justifyContent: "center",
+                    justifyContent: "space-between",
                     alignItems: "center",
+                  }
+            }
+          >
+            {!leftPanelCollapsed && (
+              <Typography variant="h6">Journal Jam</Typography>
+            )}
+            <Tooltip
+              title={leftPanelCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+            >
+              <IconButton
+                size="large"
+                onClick={toggleLeftPanelCollapsed}
+                color="inherit"
+              >
+                {leftPanelCollapsed ? (
+                  <ChevronRightIcon />
+                ) : (
+                  <ChevronLeftIcon />
+                )}
+              </IconButton>
+            </Tooltip>
+          </Box>
+          <Tooltip title="Create new journal entry">
+            {!leftPanelCollapsed ? (
+              <Button
+                sx={{ p: 2 }}
+                onClick={handleNewEntry}
+                startIcon={<EditNoteIcon />}
+              >
+                New entry
+              </Button>
+            ) : (
+              <Box sx={{ display: "flex", justifyContent: "center" }}>
+                <IconButton size="large" color="primary">
+                  <EditNoteIcon />
+                </IconButton>
+              </Box>
+            )}
+          </Tooltip>
+
+          <Box
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              justifyContent: "space-between",
+              height: "100%",
+              marginBottom: "10px",
+            }}
+          >
+            {!leftPanelCollapsed && (
+              <Box>
+                <Box sx={{ pl: 2, pr: 2, pt: 2 }}>
+                  <Typography sx={{ flexGrow: 1 }} variant="body">
+                    Entries
+                  </Typography>
+                </Box>
+                <List
+                  style={{
+                    maxHeight: "400px",
+                    overflow: "auto",
                   }}
                 >
-                  <Typography variant="h4">Journal Jam</Typography>
-                  <Typography sx={{ mt: 1 }} variant="body">
-                    Create a new journal entry.
-                  </Typography>
-                  <Button
-                    sx={{ mt: 2 }}
-                    variant="outlined"
-                    onClick={handleNewEntry}
+                  {entries.length > 0 ? (
+                    entries.map((entry, i) => (
+                      <ListItemButton
+                        sx={{ width: "100%" }}
+                        key={i}
+                        selected={selectedIndex === i.toString()}
+                        onClick={(e) => handleJournalEntrySelected(e, i)}
+                      >
+                        <ListItemText
+                          primary={getDisplayedEntryTitle(entry?.title)}
+                        />
+                      </ListItemButton>
+                    ))
+                  ) : (
+                    <Box
+                      sx={{ display: "flex", justifyContent: "center", p: 2 }}
+                    >
+                      <Typography variant="body">
+                        No journal entries to display.
+                      </Typography>
+                    </Box>
+                  )}
+                </List>
+              </Box>
+            )}
+            <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+              }}
+            >
+              <List>
+                <ListItem key={"logout"} disablePadding>
+                  <Tooltip
+                    title={`Change to ${
+                      theme === "dark" ? "light" : "dark"
+                    } theme.`}
                   >
-                    New entry
-                  </Button>
-                </Box>
-              ) : (
-                <>
-                  <EditEntry
-                    entries={entries}
-                    updateEntries={setEntries}
-                    selectedIndex={selectedIndex}
-                    // handleEntryUpdate={handleEntryUpdate}
-                    ref={editEntryContentRef}
-                    journalEntriesCollapsed={journalEntriesCollapsed}
-                    collapseJournalEntries={handleCollapseJournalEntries}
-                    expandJournalEntries={handleExpandJournalEntries}
-                  />
-                </>
-              )}
-            </Paper>
-          </Panel>
-        </PanelGroup>
-      </Box>
+                    {leftPanelCollapsed ? (
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "center",
+                          width: "100%",
+                        }}
+                      >
+                        <IconButton size="large" onClick={toggleTheme}>
+                          {theme === "dark" ? (
+                            <LightModeIcon />
+                          ) : (
+                            <DarkModeIcon />
+                          )}
+                        </IconButton>
+                      </Box>
+                    ) : (
+                      <ListItemButton onClick={toggleTheme}>
+                        <ListItemIcon>
+                          {theme === "dark" ? (
+                            <LightModeIcon />
+                          ) : (
+                            <DarkModeIcon />
+                          )}
+                        </ListItemIcon>
+                        <ListItemText
+                          primary={
+                            theme === "dark" ? "Light Mode" : "Dark Mode"
+                          }
+                        />
+                      </ListItemButton>
+                    )}
+                  </Tooltip>
+                </ListItem>
+                <ListItem key={"sign-out"} disablePadding>
+                  <Tooltip title={"Sign out"}>
+                    {leftPanelCollapsed ? (
+                      <Box
+                        sx={{
+                          display: "flex",
+                          justifyContent: "center",
+                          width: "100%",
+                        }}
+                      >
+                        <IconButton size="large" onClick={handleSignOut}>
+                          <LogoutIcon />
+                        </IconButton>
+                      </Box>
+                    ) : (
+                      <ListItemButton onClick={handleSignOut}>
+                        <ListItemIcon>
+                          <LogoutIcon />
+                        </ListItemIcon>
+                        <ListItemText primary={"Sign out"} />
+                      </ListItemButton>
+                    )}
+                  </Tooltip>
+                </ListItem>
+              </List>
+            </Box>
+          </Box>
+        </Panel>
+        <PanelResizeHandle />
+        <Panel minSize={20} defaultSize={75}>
+          {selectedIndex === undefined ? (
+            <Box
+              sx={{
+                width: "100%",
+                height: "100%",
+                display: "flex",
+                flexDirection: "column",
+                justifyContent: "center",
+                alignItems: "center",
+              }}
+            >
+              <Typography variant="h4">Journal Jam</Typography>
+              <Typography sx={{ mt: 1 }} variant="body">
+                Create a new journal entry.
+              </Typography>
+              <Button sx={{ mt: 2 }} onClick={handleNewEntry}>
+                New entry
+              </Button>
+            </Box>
+          ) : (
+            <>
+              <EditEntry
+                entries={entries}
+                updateEntries={setEntries}
+                selectedIndex={selectedIndex}
+                ref={editEntryContentRef}
+              />
+            </>
+          )}
+        </Panel>
+      </PanelGroup>
     </Box>
   );
 };

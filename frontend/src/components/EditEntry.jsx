@@ -1,6 +1,7 @@
 import React, {
   useEffect,
   useState,
+  useRef,
   forwardRef,
   useImperativeHandle,
 } from "react";
@@ -30,19 +31,10 @@ import DialogTitle from "@mui/material/DialogTitle";
 const MAX_TITLE_LEN = 100;
 const UNSAVED_MSG =
   "You have some unsaved changed. Are you sure that you want to leave the page?";
+const TEXT_FIELD_ROW_HEIGHT = 23; /* The height (pixels) of one text area row. */
 
 const EditEntry = forwardRef(
-  (
-    {
-      entries,
-      updateEntries,
-      selectedIndex,
-      journalEntriesCollapsed,
-      collapseJournalEntries,
-      expandJournalEntries,
-    },
-    ref
-  ) => {
+  ({ entries, updateEntries, selectedIndex }, ref) => {
     const [entryContent, setEntryContent] = useState("");
     const [initialContent, setInitialContent] = useState(undefined);
     const [lastSaved, setLastSaved] = useState(undefined);
@@ -58,6 +50,7 @@ const EditEntry = forwardRef(
     const [dialogMessage, setDialogMessage] = useState("");
     const [dialogDescription, setDialogDescription] = useState("");
 
+    const mainBarAndPromptRef = useRef();
     const { height } = useWindowDimensions();
     const [searchParams, setSearchParams] = useSearchParams();
 
@@ -108,9 +101,21 @@ const EditEntry = forwardRef(
       },
     }));
 
+    /* Dynamically set the number of rows of the entry content text field so 
+    that the entire right panel fits in one view height. */
+    const updateTextAreaRows = () => {
+      if (!document.getElementById("mainBarAndPrompt")?.clientHeight) return;
+
+      /* TODO: handle updating this based on whether or not the prompt panel is open */
+      let availableHeight =
+        height - document.getElementById("mainBarAndPrompt")?.clientHeight;
+      let rows = availableHeight / TEXT_FIELD_ROW_HEIGHT - 5;
+      setTextAreaRows(rows);
+    };
+
     /* Set the number of rows of the text field based on the window height */
     useEffect(() => {
-      setTextAreaRows(0.04 * height - 8);
+      updateTextAreaRows();
     }, [height]);
 
     const handleEntryUpdateTitle = (e) => {
@@ -125,7 +130,6 @@ const EditEntry = forwardRef(
 
     const handleEntryUpdateContent = (e) => {
       e.preventDefault();
-      console.log(e.target.value);
       setEntryContent(e.target.value);
 
       /* Indicate that there are changes to be saved. */
@@ -265,7 +269,7 @@ const EditEntry = forwardRef(
     const handleCloseEntry = (e) => {
       e?.preventDefault();
 
-      expandJournalEntries();
+      // expandJournalEntries();
       const newSearchParams = searchParams;
       searchParams.delete("si");
       setSearchParams(newSearchParams);
@@ -310,107 +314,101 @@ const EditEntry = forwardRef(
           beforeUnload={true}
         />
 
-        <Box sx={{ p: 1, display: "flex", alignItems: "center" }}>
-          {/* Entry Title */}
-          <TextField
-            variant="standard"
-            fullWidth
-            name="title"
-            sx={{ ml: 1 }}
-            value={entryTitle}
-            style={{ fontSize: "50px" }}
-            placeholder="Name your journal entry"
-            size="large"
-            InputProps={{
-              disableUnderline: true,
-              style: { fontSize: 20 },
-            }}
-            onChange={handleEntryUpdateTitle}
-          />
-          {/* Entry Menu */}
-          <Box>
-            <IconButton
+        <Box id="mainBarAndPrompt" ref={mainBarAndPromptRef}>
+          <Box sx={{ p: 1, display: "flex", alignItems: "center" }}>
+            {/* Entry Title */}
+            <TextField
+              variant="standard"
+              fullWidth
+              name="title"
+              sx={{ ml: 1 }}
+              value={entryTitle}
+              style={{ fontSize: "50px" }}
+              placeholder="Name your journal entry"
               size="large"
-              aria-label="More Entry Options"
-              aria-controls="menu-journal-entry"
-              aria-haspopup="true"
-              onClick={handleOpenMenu}
-              color="inherit"
-            >
-              <MoreVertIcon />
-            </IconButton>
-            <Menu
-              id="menu-journal-entry"
-              anchorEl={menuAnchorEl}
-              anchorOrigin={{
-                vertical: "top",
-                horizontal: "right",
+              InputProps={{
+                disableUnderline: true,
+                style: { fontSize: 20 },
               }}
-              keepMounted
-              transformOrigin={{
-                vertical: "top",
-                horizontal: "right",
-              }}
-              open={Boolean(menuAnchorEl)}
-              onClose={handleCloseMenu}
-            >
-              <MenuItem
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleGetAIPrompt();
-                  handleCloseMenu();
-                }}
+              onChange={handleEntryUpdateTitle}
+            />
+            {/* Entry Menu */}
+            <Box>
+              <IconButton
+                size="large"
+                aria-label="More Entry Options"
+                aria-controls="menu-journal-entry"
+                aria-haspopup="true"
+                onClick={handleOpenMenu}
+                color="inherit"
               >
-                Get AI Prompt
-              </MenuItem>
-              <MenuItem
-                onClick={(e) => {
-                  e.preventDefault();
-                  !journalEntriesCollapsed
-                    ? collapseJournalEntries(e)
-                    : expandJournalEntries(e);
-                  handleCloseMenu();
+                <MoreVertIcon />
+              </IconButton>
+              <Menu
+                id="menu-journal-entry"
+                anchorEl={menuAnchorEl}
+                anchorOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
                 }}
-              >
-                {!journalEntriesCollapsed ? "Hide Entries" : "Show Entries"}
-              </MenuItem>
-              <MenuItem onClick={handleCloseEntry}>Close Entry</MenuItem>
-              <MenuItem
-                onClick={(e) => {
-                  e.preventDefault();
-                  handleSave(e);
-                  handleCloseMenu(e);
+                keepMounted
+                transformOrigin={{
+                  vertical: "top",
+                  horizontal: "right",
                 }}
+                open={Boolean(menuAnchorEl)}
+                onClose={handleCloseMenu}
               >
-                Save
-              </MenuItem>
-              <MenuItem onClick={handleDelete}>Delete</MenuItem>
-            </Menu>
+                <MenuItem
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleGetAIPrompt();
+                    handleCloseMenu();
+                  }}
+                >
+                  Get AI Prompt
+                </MenuItem>
+                <MenuItem onClick={handleCloseEntry}>Close Entry</MenuItem>
+                <MenuItem
+                  onClick={(e) => {
+                    e.preventDefault();
+                    handleSave(e);
+                    handleCloseMenu(e);
+                  }}
+                >
+                  Save
+                </MenuItem>
+                <MenuItem onClick={handleDelete}>Delete</MenuItem>
+              </Menu>
+            </Box>
           </Box>
-        </Box>
 
-        <Divider />
+          <Divider />
 
-        <Box sx={{ m: 2 }}>
-          {/* Consider using an accordion, or implement the prompt panel again */}
-          {/* <Accordion variant="outlined" defaultExpanded>
-            <AccordionSummary
-              expandIcon={<ExpandMoreIcon />}
-              aria-controls="panel3-content"
-              id="panel3-header"
+          <Box sx={{ m: 2 }}>
+            {/* Consider using an accordion, or implement the prompt panel again */}
+            {/* <Accordion
+              // variant="outlined"
+              defaultExpanded
             >
-              Accordion Actions
-            </AccordionSummary>
-            <AccordionDetails>
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-              Suspendisse malesuada lacus ex, sit amet blandit leo lobortis
-              eget.
-            </AccordionDetails>
-            <AccordionActions>
-              <Button>Cancel</Button>
-              <Button>Agree</Button>
-            </AccordionActions>
-          </Accordion> */}
+              <AccordionSummary
+                expandIcon={<ExpandMoreIcon />}
+                aria-controls="panel3-content"
+                id="panel3-header"
+              >
+                Accordion Actions
+              </AccordionSummary>
+              <AccordionDetails>
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+                Suspendisse malesuada lacus ex, sit amet blandit leo lobortis
+                eget.
+              </AccordionDetails>
+              <AccordionActions>
+                <Button>Cancel</Button>
+                <Button>Agree</Button>
+              </AccordionActions>
+            </Accordion> */}
+          </Box>
         </Box>
 
         {/* Entry content editing box */}
@@ -421,8 +419,9 @@ const EditEntry = forwardRef(
               name="content"
               fullWidth
               multiline
-              minRows={10}
-              // rows={textAreaRows}
+              // minRows={10}
+              rows={textAreaRows}
+              // maxRows={textAreaRows}
               value={entryContent}
               onChange={handleEntryUpdateContent}
               placeholder="What's on your mind?"
@@ -439,7 +438,7 @@ const EditEntry = forwardRef(
             }}
             sx={{ mt: 1 }}
           >
-            <Button variant="outlined">Get AI Prompt</Button>
+            <Button>Get AI Prompt</Button>
             <Box
               sx={{
                 display: "flex",
@@ -449,11 +448,7 @@ const EditEntry = forwardRef(
               <Typography sx={{ mr: 2 }} variant="body2">
                 {lastSaved ? `Last saved ${lastSaved}` : "Unsaved"}
               </Typography>
-              <LoadingButton
-                loading={saving}
-                variant="outlined"
-                onClick={handleSave}
-              >
+              <LoadingButton loading={saving} onClick={handleSave}>
                 Save
               </LoadingButton>
             </Box>

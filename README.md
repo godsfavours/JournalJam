@@ -1,5 +1,9 @@
 # Team 37 (JournalJam)
 
+## TODO:
+ - Add instructions for generating OpenAI key, adding key to environment variable, and finetuning model (if user wants to run through this process themselves)
+ - push instructions for dockerizing to main (consider uploading base images to docker hub)
+
 [About Us](https://github.com/StanfordCS194/Win24-Team37/wiki)
 
 ## Tech Stack

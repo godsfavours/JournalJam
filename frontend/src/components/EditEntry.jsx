@@ -10,6 +10,7 @@ import Prompt from "../utils/Prompt";
 import Divider from "@mui/material/Divider";
 import MenuItem from "@mui/material/MenuItem";
 import Menu from "@mui/material/Menu";
+import Tooltip from "@mui/material/Tooltip";
 import { Box, Typography, Button, TextField, IconButton } from "@mui/material";
 import { LoadingButton } from "@mui/lab";
 import CircularProgress from "@mui/material/CircularProgress";
@@ -27,6 +28,8 @@ import DialogActions from "@mui/material/DialogActions";
 import DialogContent from "@mui/material/DialogContent";
 import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
+import RefreshIcon from "@mui/icons-material/Refresh";
+import CloseIcon from "@mui/icons-material/Close";
 
 const MAX_TITLE_LEN = 100;
 const UNSAVED_MSG =
@@ -302,7 +305,11 @@ const EditEntry = forwardRef(
       setDialogOpen(false);
     };
 
-    const handleGetAIPrompt = () => {};
+    const handleGetAIPrompt = (e) => {
+      setDialogMessage("Test Dialog");
+      setDialogDescription(`Click Cancel `);
+      setDialogOpen(true);
+    };
 
     if (loading)
       return (
@@ -400,7 +407,7 @@ const EditEntry = forwardRef(
 
           <Box sx={{ m: 2 }}>
             {/* Consider using an accordion, or implement the prompt panel again */}
-            {/* <Accordion
+            <Accordion
               // variant="outlined"
               defaultExpanded
             >
@@ -409,18 +416,37 @@ const EditEntry = forwardRef(
                 aria-controls="panel3-content"
                 id="panel3-header"
               >
-                Accordion Actions
-              </AccordionSummary>
-              <AccordionDetails>
                 Lorem ipsum dolor sit amet, consectetur adipiscing elit.
                 Suspendisse malesuada lacus ex, sit amet blandit leo lobortis
                 eget.
-              </AccordionDetails>
+              </AccordionSummary>
+              {/* <AccordionDetails>
+                <b>Your Daily Inspiration Prompt</b>
+              </AccordionDetails> */}
               <AccordionActions>
-                <Button>Cancel</Button>
-                <Button>Agree</Button>
+                <Tooltip title={"Give me another prompt"}>
+                  <IconButton
+                    color="primary"
+                    onClick={(e) => {
+                      handleGetAIPrompt(e);
+                    }}
+                  >
+                    <RefreshIcon />
+                  </IconButton>
+                </Tooltip>
+                <Tooltip title={"Don't prompt me about this topic again"}>
+                  <IconButton
+                    color="primary"
+                    onClick={(e) => {
+                      // e.preventDefault();
+                      handleGetAIPrompt(e);
+                    }}
+                  >
+                    <CloseIcon />
+                  </IconButton>
+                </Tooltip>
               </AccordionActions>
-            </Accordion> */}
+            </Accordion>
           </Box>
         </Box>
 
@@ -451,7 +477,13 @@ const EditEntry = forwardRef(
             }}
             sx={{ mt: 1 }}
           >
-            <Button>Get AI Prompt</Button>
+            <Button
+              onClick={(e) => {
+                handleGetAIPrompt();
+              }}
+            >
+              Get AI Prompt
+            </Button>
             <Box
               sx={{
                 display: "flex",

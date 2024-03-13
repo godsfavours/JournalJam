@@ -72,7 +72,12 @@ const EditEntry = forwardRef(
           const promptRes = await axios.get(
             `/api/entries/${entries[selectedIndex].id}/prompt/`
           );
-          setPrompt(promptRes.data.prompt);
+          const promptData = promptRes.data.prompt;
+          if (!promptData) {
+            setPrompt("");
+          } else {
+            setPrompt(promptData);
+          }
           /* Update state. */
           setEntryContent(res.data.content);
           setInitialContent(res.data.content);
@@ -312,12 +317,13 @@ const EditEntry = forwardRef(
       setDialogOpen(false);
     };
 
-    const savePrompt = async () => {
+    const savePrompt = async (promptData) => {
+      console.log("prompt: ", promptData);
       try {
-        let res = await axios.put(
+        let res = await axios.patch(
           `/api/entries/${entries[selectedIndex].id}/prompt/`,
           {
-            prompt: prompt,
+            prompt: promptData,
           },
           {
             headers: {
@@ -333,9 +339,11 @@ const EditEntry = forwardRef(
 
     const handleGetAIPrompt = async () => {
       setLoading(true);
+
       try {
-        setPrompt("This is a new prompt!");
-        await savePrompt(); //put request for prompt
+        const aiPrompt = "Load AI Prompt here";
+        setPrompt(aiPrompt);
+        await savePrompt(aiPrompt);
       } catch (e) {
         /* TODO: handle errors. Use https://mui.com/material-ui/react-alert/ */
       }
@@ -479,7 +487,7 @@ const EditEntry = forwardRef(
 
         {/* Entry content editing box */}
         <Box sx={{ m: 2 }}>
-          <Box component="form" sx={{ mb: 2 }}>
+          <Box component="form" sx={{ mb: 2, width: "100%" }}>
             <TextField
               variant="standard"
               name="content"
@@ -492,6 +500,9 @@ const EditEntry = forwardRef(
               onChange={handleEntryUpdateContent}
               placeholder="What's on your mind?"
               autoFocus
+              sx={{
+                flexGrow: 1,
+              }}
             />
           </Box>
 
@@ -502,7 +513,7 @@ const EditEntry = forwardRef(
               justifyContent: "space-between",
               alignItems: "center",
             }}
-            sx={{ mt: 1 }}
+            sx={{ mt: 1, width: "100%" }}
           >
             <Button
               onClick={(e) => {

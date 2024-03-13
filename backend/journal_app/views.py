@@ -173,7 +173,7 @@ class LLMJournalEntriesAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, user_id):
-        entries = JournalEntry.objects.filter(user=user_id).order_by('-last_updated')[:3]
+        entries = JournalEntry.objects.filter(user=user_id).order_by('last_updated')[-3:]
         
         # Preprocess entries
         entries_text = JOURNAL_ENTRY_PREPEND + "\n\n".join(entry.text for entry in entries)

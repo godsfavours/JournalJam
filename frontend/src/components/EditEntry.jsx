@@ -5,6 +5,7 @@ import React, {
   forwardRef,
   useImperativeHandle,
 } from "react";
+import { useTheme } from "@mui/material/styles";
 import axios from "axios";
 import Prompt from "../utils/Prompt";
 import Divider from "@mui/material/Divider";
@@ -38,6 +39,7 @@ const TEXT_FIELD_ROW_HEIGHT = 23; /* The height (pixels) of one text area row. *
 
 const EditEntry = forwardRef(
   ({ entries, updateEntries, selectedIndex }, ref) => {
+    const theme = useTheme();
     const [entryContent, setEntryContent] = useState("");
     const [initialContent, setInitialContent] = useState(undefined);
     const [lastSaved, setLastSaved] = useState(undefined);
@@ -399,7 +401,18 @@ const EditEntry = forwardRef(
                 onChange={handleEntryUpdateTitle}
               />
               {/* Entry Menu */}
-              <Box>
+              <Box style={{ display: "flex" }}>
+                {/* Prompt Button */}
+                <Button
+                  variant="contained"
+                  size="small"
+                  style={{ whiteSpace: "nowrap" }}
+                  onClick={(e) => {
+                    handleGetAIPrompt();
+                  }}
+                >
+                  Get AI Prompt
+                </Button>
                 <IconButton
                   size="large"
                   aria-label="More Entry Options"
@@ -447,7 +460,12 @@ const EditEntry = forwardRef(
           <Box
             sx={{
               m: 2,
+            }}
+            style={{
+              display: "flex",
+              flexDirection: "column",
               flexGrow: 1,
+              flexShrink: 1,
             }}
           >
             {/* AI Prompt Box */}
@@ -495,7 +513,11 @@ const EditEntry = forwardRef(
             )}
 
             {/* Text Field */}
-            <Box component="form" sx={{ mb: 2, flexGrow: 1, flexShrink: 1 }}>
+            <Box
+              component="form"
+              style={{ flexGrow: 1, flexShrink: 1 }}
+              sx={{ mb: 2 }}
+            >
               <TextField
                 variant="standard"
                 name="content"
@@ -516,108 +538,24 @@ const EditEntry = forwardRef(
               />
             </Box>
 
-            {/* New Bottom Bar */}
-
-            {/* <Box
-              sx={{
-                p: 1,
-                display: "flex",
-                alignItems: "center",
-                marginTop: "auto",
-                position: "fixed",
-                bottom: 0,
-                width: "100%",
-                zIndex: 1000,
-              }}
-            >
-             
-              <Button
-                onClick={(e) => {
-                  handleGetAIPrompt();
-                }}
-              >
-                Get AI Prompt
-              </Button>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                }}
-              >
-                <Typography sx={{ mr: 2 }} variant="body2">
-                  {lastSaved ? `Last saved ${lastSaved}` : "Unsaved"}
-                </Typography>
-                <LoadingButton loading={saving} onClick={handleSave}>
-                  Save
-                </LoadingButton>
-              </Box>
-
-            </Box> */}
-
             {/* Bottom panel */}
             <Box
               style={{
                 p: 1,
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "space-between",
+                justifyContent: "flex-start",
                 marginTop: "auto",
                 position: "fixed",
                 bottom: 0,
-                width: "100%",
+                width: "90%",
+                height: "15%",
                 zIndex: 2,
-                backgroundColor: "#131312",
-                // backgroundColor: "#ffffff",
-                // backgroundColor:
-                //   theme.palette.mode === "dark" ? "#424242" : "#ffffff",
               }}
-              sx={{ mt: 1 }}
-            >
-              <Button
-                onClick={(e) => {
-                  handleGetAIPrompt();
-                }}
-              >
-                Get AI Prompt
-              </Button>
-
-              <Box
-                sx={{
-                  width: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  borderColor: "red",
-                  borderWidth: 1,
-                }}
-              >
-                <Typography sx={{ mr: 2 }} variant="body2">
-                  {lastSaved ? `Last saved ${lastSaved}` : "Unsaved"}
-                </Typography>
-                <LoadingButton loading={saving} onClick={handleSave}>
-                  Save
-                </LoadingButton>
-              </Box>
-            </Box>
-            {/* Bottom panel */}
-            {/* <Box
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-            sx={{ mt: 1, width: "100%" }}
-          >
-            <Button
-              onClick={(e) => {
-                handleGetAIPrompt();
-              }}
-            >
-              Get AI Prompt
-            </Button>
-            <Box
               sx={{
-                display: "flex",
-                alignItems: "center",
+                mt: 1,
+                backgroundColor:
+                  theme.palette.mode === "dark" ? "#131312" : "#ffffff",
               }}
             >
               <Typography sx={{ mr: 2 }} variant="body2">
@@ -627,7 +565,6 @@ const EditEntry = forwardRef(
                 Save
               </LoadingButton>
             </Box>
-          </Box> */}
 
             <Dialog open={dialogOpen} onClose={handleDialogClose}>
               <DialogTitle id="alert-dialog-title">{dialogMessage}</DialogTitle>

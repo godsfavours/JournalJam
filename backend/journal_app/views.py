@@ -257,6 +257,6 @@ class LLMJournalEntriesAPIView(APIView):
         )
         
         response_text = response.choices[0].message.content
-        response_list = [i[3:] for i in response_text.split('\n')]
+        response_list = [i[3:] if i[0].isnumeric() else i for i in response_text.split('\n')]
         
         return Response({"prompts": response_list}, status=status.HTTP_200_OK)

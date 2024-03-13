@@ -46,6 +46,7 @@ const EditEntry = forwardRef(
     const [dirty, setDirty] =
       useState(false); /* if changes were made that have not been saved. */
     const [entryTitle, setEntryTitle] = useState("");
+    const [prompt, setPrompt] = useState("");
     const [initialTitle, setInitialTitle] = useState(undefined);
     const [menuAnchorEl, setMenuAnchorEl] = useState(null);
     const [saving, setSaving] = useState(false);
@@ -60,12 +61,18 @@ const EditEntry = forwardRef(
     /* Fetch the entry on load. */
     useEffect(() => {
       const getEntry = async () => {
+        /* TODO: edit this to shortened prompt title */
+        /* grab prompt from user */
+        /* TODO: add POST for prompt as well*/
         try {
           setLoading(true);
           const res = await axios.get(
             `/api/entries/${entries[selectedIndex].id}/content/`
           );
-
+          const promptRes = await axios.get(
+            `/api/entries/${entries[selectedIndex].id}/prompt/`
+          );
+          setPrompt(promptRes.data.prompt);
           /* Update state. */
           setEntryContent(res.data.content);
           setInitialContent(res.data.content);
@@ -305,10 +312,37 @@ const EditEntry = forwardRef(
       setDialogOpen(false);
     };
 
-    const handleGetAIPrompt = (e) => {
-      setDialogMessage("Test Dialog");
-      setDialogDescription(`Click Cancel `);
-      setDialogOpen(true);
+    const savePrompt = async () => {
+      try {
+        let res = await axios.put(
+          `/api/entries/${entries[selectedIndex].id}/prompt/`,
+          {
+            prompt: prompt,
+          },
+          {
+            headers: {
+              "X-CSRFTOKEN": Cookies.get("csrftoken"),
+            },
+          }
+        );
+      } catch (e) {
+        /* TODO: handle errors. Use https://mui.com/material-ui/react-alert/ */
+        throw e;
+      }
+    };
+
+    const handleGetAIPrompt = async () => {
+      setLoading(true);
+      try {
+        setPrompt("This is a new prompt!");
+        await savePrompt(); //put request for prompt
+      } catch (e) {
+        /* TODO: handle errors. Use https://mui.com/material-ui/react-alert/ */
+      }
+      // setDialogMessage("Test Dialog");
+      // setDialogDescription(`Click Cancel `);
+      // setDialogOpen(true);
+      setLoading(false);
     };
 
     if (loading)
@@ -379,15 +413,6 @@ const EditEntry = forwardRef(
                 open={Boolean(menuAnchorEl)}
                 onClose={handleCloseMenu}
               >
-                <MenuItem
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleGetAIPrompt();
-                    handleCloseMenu();
-                  }}
-                >
-                  Get AI Prompt
-                </MenuItem>
                 <MenuItem onClick={handleCloseEntry}>Close Entry</MenuItem>
                 <MenuItem
                   onClick={(e) => {
@@ -406,47 +431,49 @@ const EditEntry = forwardRef(
           <Divider />
 
           <Box sx={{ m: 2 }}>
-            {/* Consider using an accordion, or implement the prompt panel again */}
-            <Accordion
-              // variant="outlined"
-              defaultExpanded
-            >
-              <AccordionSummary
-                expandIcon={<ExpandMoreIcon />}
-                aria-controls="panel3-content"
-                id="panel3-header"
+            {/* AI Prompt Box */}
+            {prompt !== "" ? (
+              <Accordion
+                // variant="outlined"
+                defaultExpanded
               >
-                Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-                Suspendisse malesuada lacus ex, sit amet blandit leo lobortis
-                eget.
-              </AccordionSummary>
-              {/* <AccordionDetails>
+                <AccordionSummary
+                  expandIcon={<ExpandMoreIcon />}
+                  aria-controls="panel3-content"
+                  id="panel3-header"
+                >
+                  {prompt}
+                </AccordionSummary>
+                {/* <AccordionDetails>
                 <b>Your Daily Inspiration Prompt</b>
               </AccordionDetails> */}
-              <AccordionActions>
-                <Tooltip title={"Give me another prompt"}>
-                  <IconButton
-                    color="primary"
-                    onClick={(e) => {
-                      handleGetAIPrompt(e);
-                    }}
-                  >
-                    <RefreshIcon />
-                  </IconButton>
-                </Tooltip>
-                <Tooltip title={"Don't prompt me about this topic again"}>
-                  <IconButton
-                    color="primary"
-                    onClick={(e) => {
-                      // e.preventDefault();
-                      handleGetAIPrompt(e);
-                    }}
-                  >
-                    <CloseIcon />
-                  </IconButton>
-                </Tooltip>
-              </AccordionActions>
-            </Accordion>
+                <AccordionActions>
+                  <Tooltip title={"Give me another prompt"}>
+                    <IconButton
+                      color="primary"
+                      onClick={(e) => {
+                        handleGetAIPrompt(e);
+                      }}
+                    >
+                      <RefreshIcon />
+                    </IconButton>
+                  </Tooltip>
+                  <Tooltip title={"Don't prompt me about this topic again"}>
+                    <IconButton
+                      color="primary"
+                      onClick={(e) => {
+                        // e.preventDefault();
+                        handleGetAIPrompt(e);
+                      }}
+                    >
+                      <CloseIcon />
+                    </IconButton>
+                  </Tooltip>
+                </AccordionActions>
+              </Accordion>
+            ) : (
+              <></>
+            )}
           </Box>
         </Box>
 

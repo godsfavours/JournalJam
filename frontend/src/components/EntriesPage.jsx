@@ -422,6 +422,7 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
                 updateEntries={setEntries}
                 selectedIndex={selectedIndex}
                 ref={editEntryContentRef}
+                user={user}
               />
             </>
           )}

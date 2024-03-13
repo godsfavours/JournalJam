@@ -341,9 +341,8 @@ const EditEntry = forwardRef(
 
     const handleGetAIPrompt = async () => {
       setLoading(true);
-      // console.log("USERID: ", user); ${user.id}
       try {
-        const res = await axios.get(`/llm/entries/7/`);
+        const res = await axios.get(`/llm/entries/${user.id}/`);
         console.log("RESL: ", res.data);
         const aiPrompt = res.data;
         setPrompt(aiPrompt);

@@ -10,6 +10,8 @@ from rest_framework.permissions import IsAuthenticated
 from rest_framework import status
 from django.contrib.auth.models import User
 from .serializers import UserSerializer, JournalEntrySerializer, JournalEntryContentSerializer, JournalPromptSerializer
+from .llm import client
+from .configs import SYSTEM_PROMPT, JOURNAL_ENTRY_PREPEND, MODEL_ID
 
 # Create your views here.
 
@@ -215,5 +217,27 @@ class LogoutAPIView(APIView):
     def post(self, request):
         logout(request)
         return Response({'detail': 'Logout successful'}, status=status.HTTP_200_OK)
+    
+    
 
+class LLMJournalEntriesAPIView(APIView):
+    permission_classes = [IsAuthenticated]
 
+    def get(self, request, user_id):
+        entries = JournalEntry.objects.filter(user=user_id).order_by('last_updated')[-3:]
+        
+        # Preprocess entries
+        entries_text = JOURNAL_ENTRY_PREPEND + "\n\n".join(entry.text for entry in entries)
+        
+        messages = [
+            {"role": "system", "content": SYSTEM_PROMPT},
+            {"role": "user", "content": entries_text},
+        ]
+        
+        response = client.chat.completions.create(
+            model=MODEL_ID,
+            messages=messages
+        )
+        
+        response_text = response.choices[0].message.content
+        return Response({"response": response_text}, status=status.HTTP_200_OK)

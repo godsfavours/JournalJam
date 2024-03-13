@@ -14,4 +14,5 @@ urlpatterns = [
 
     path('api/entries/<int:entry_id>/prompt/', views.JournalPromptAPIView.as_view(), name='journal_entry_prompt'), #get and put
     
+    path('llm/entries/<int:user_id>/', views.LLMJournalEntriesAPIView.as_view(), name='llm_entries_by_user'),
 ]

@@ -369,76 +369,87 @@ const EditEntry = forwardRef(
 
     return (
       <React.Fragment>
-        {/* For preventing navigating away with unsaved changes */}
-        <Prompt
-          when={!saving && dirty}
-          message={UNSAVED_MSG}
-          beforeUnload={true}
-        />
+        <Box
+          sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}
+        >
+          {/* For preventing navigating away with unsaved changes */}
 
-        <Box id="mainBarAndPrompt" ref={mainBarAndPromptRef}>
-          <Box sx={{ p: 1, display: "flex", alignItems: "center" }}>
-            {/* Entry Title */}
-            <TextField
-              variant="standard"
-              fullWidth
-              name="title"
-              sx={{ ml: 1 }}
-              value={entryTitle}
-              style={{ fontSize: "50px" }}
-              placeholder="Name your journal entry"
-              size="large"
-              InputProps={{
-                disableUnderline: true,
-                style: { fontSize: 20 },
-              }}
-              onChange={handleEntryUpdateTitle}
-            />
-            {/* Entry Menu */}
-            <Box>
-              <IconButton
+          <Prompt
+            when={!saving && dirty}
+            message={UNSAVED_MSG}
+            beforeUnload={true}
+          />
+
+          <Box id="mainBarAndPrompt" ref={mainBarAndPromptRef}>
+            <Box sx={{ p: 1, display: "flex", alignItems: "center" }}>
+              {/* Entry Title */}
+              <TextField
+                variant="standard"
+                fullWidth
+                name="title"
+                sx={{ ml: 1 }}
+                value={entryTitle}
+                style={{ fontSize: "50px" }}
+                placeholder="Name your journal entry"
                 size="large"
-                aria-label="More Entry Options"
-                aria-controls="menu-journal-entry"
-                aria-haspopup="true"
-                onClick={handleOpenMenu}
-                color="inherit"
-              >
-                <MoreVertIcon />
-              </IconButton>
-              <Menu
-                id="menu-journal-entry"
-                anchorEl={menuAnchorEl}
-                anchorOrigin={{
-                  vertical: "top",
-                  horizontal: "right",
+                InputProps={{
+                  disableUnderline: true,
+                  style: { fontSize: 20 },
                 }}
-                keepMounted
-                transformOrigin={{
-                  vertical: "top",
-                  horizontal: "right",
-                }}
-                open={Boolean(menuAnchorEl)}
-                onClose={handleCloseMenu}
-              >
-                <MenuItem onClick={handleCloseEntry}>Close Entry</MenuItem>
-                <MenuItem
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleSave(e);
-                    handleCloseMenu(e);
-                  }}
+                onChange={handleEntryUpdateTitle}
+              />
+              {/* Entry Menu */}
+              <Box>
+                <IconButton
+                  size="large"
+                  aria-label="More Entry Options"
+                  aria-controls="menu-journal-entry"
+                  aria-haspopup="true"
+                  onClick={handleOpenMenu}
+                  color="inherit"
                 >
-                  Save
-                </MenuItem>
-                <MenuItem onClick={handleDelete}>Delete</MenuItem>
-              </Menu>
+                  <MoreVertIcon />
+                </IconButton>
+                <Menu
+                  id="menu-journal-entry"
+                  anchorEl={menuAnchorEl}
+                  anchorOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                  }}
+                  keepMounted
+                  transformOrigin={{
+                    vertical: "top",
+                    horizontal: "right",
+                  }}
+                  open={Boolean(menuAnchorEl)}
+                  onClose={handleCloseMenu}
+                >
+                  <MenuItem onClick={handleCloseEntry}>Close Entry</MenuItem>
+                  <MenuItem
+                    onClick={(e) => {
+                      e.preventDefault();
+                      handleSave(e);
+                      handleCloseMenu(e);
+                    }}
+                  >
+                    Save
+                  </MenuItem>
+                  <MenuItem onClick={handleDelete}>Delete</MenuItem>
+                </Menu>
+              </Box>
             </Box>
+
+            <Divider />
           </Box>
 
-          <Divider />
-
-          <Box sx={{ m: 2 }}>
+          {/* Body box */}
+          <Box
+            sx={{
+              m: 2,
+              flexGrow: 1,
+            }}
+          >
             {/* AI Prompt Box */}
             {prompt !== "" ? (
               <Accordion
@@ -482,32 +493,113 @@ const EditEntry = forwardRef(
             ) : (
               <></>
             )}
-          </Box>
-        </Box>
 
-        {/* Entry content editing box */}
-        <Box sx={{ m: 2 }}>
-          <Box component="form" sx={{ mb: 2, width: "100%" }}>
-            <TextField
-              variant="standard"
-              name="content"
-              fullWidth
-              multiline
-              // minRows={10}
-              rows={textAreaRows}
-              // maxRows={textAreaRows}
-              value={entryContent}
-              onChange={handleEntryUpdateContent}
-              placeholder="What's on your mind?"
-              autoFocus
+            {/* Text Field */}
+            <Box component="form" sx={{ mb: 2, flexGrow: 1, flexShrink: 1 }}>
+              <TextField
+                variant="standard"
+                name="content"
+                fullWidth
+                multiline
+                // minRows={10}
+                rows={textAreaRows}
+                // maxRows={textAreaRows}
+                value={entryContent}
+                onChange={handleEntryUpdateContent}
+                placeholder="What's on your mind?"
+                autoFocus
+                sx={{
+                  flexGrow: 1,
+                  flexShrink: 1,
+                  zIndex: 1,
+                }}
+              />
+            </Box>
+
+            {/* New Bottom Bar */}
+
+            {/* <Box
               sx={{
-                flexGrow: 1,
+                p: 1,
+                display: "flex",
+                alignItems: "center",
+                marginTop: "auto",
+                position: "fixed",
+                bottom: 0,
+                width: "100%",
+                zIndex: 1000,
               }}
-            />
-          </Box>
+            >
+             
+              <Button
+                onClick={(e) => {
+                  handleGetAIPrompt();
+                }}
+              >
+                Get AI Prompt
+              </Button>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                <Typography sx={{ mr: 2 }} variant="body2">
+                  {lastSaved ? `Last saved ${lastSaved}` : "Unsaved"}
+                </Typography>
+                <LoadingButton loading={saving} onClick={handleSave}>
+                  Save
+                </LoadingButton>
+              </Box>
 
-          {/* Bottom panel */}
-          <Box
+            </Box> */}
+
+            {/* Bottom panel */}
+            <Box
+              style={{
+                p: 1,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                marginTop: "auto",
+                position: "fixed",
+                bottom: 0,
+                width: "100%",
+                zIndex: 2,
+                backgroundColor: "#131312",
+                // backgroundColor: "#ffffff",
+                // backgroundColor:
+                //   theme.palette.mode === "dark" ? "#424242" : "#ffffff",
+              }}
+              sx={{ mt: 1 }}
+            >
+              <Button
+                onClick={(e) => {
+                  handleGetAIPrompt();
+                }}
+              >
+                Get AI Prompt
+              </Button>
+
+              <Box
+                sx={{
+                  width: "100%",
+                  display: "flex",
+                  alignItems: "center",
+                  borderColor: "red",
+                  borderWidth: 1,
+                }}
+              >
+                <Typography sx={{ mr: 2 }} variant="body2">
+                  {lastSaved ? `Last saved ${lastSaved}` : "Unsaved"}
+                </Typography>
+                <LoadingButton loading={saving} onClick={handleSave}>
+                  Save
+                </LoadingButton>
+              </Box>
+            </Box>
+            {/* Bottom panel */}
+            {/* <Box
             style={{
               display: "flex",
               justifyContent: "space-between",
@@ -535,21 +627,23 @@ const EditEntry = forwardRef(
                 Save
               </LoadingButton>
             </Box>
+          </Box> */}
+
+            <Dialog open={dialogOpen} onClose={handleDialogClose}>
+              <DialogTitle id="alert-dialog-title">{dialogMessage}</DialogTitle>
+              <DialogContent>
+                <DialogContentText id="alert-dialog-description">
+                  {dialogDescription}
+                </DialogContentText>
+              </DialogContent>
+              <DialogActions>
+                <Button onClick={handleDialogClose}>Cancel</Button>
+                <Button onClick={deleteEntry} autoFocus>
+                  Delete
+                </Button>
+              </DialogActions>
+            </Dialog>
           </Box>
-          <Dialog open={dialogOpen} onClose={handleDialogClose}>
-            <DialogTitle id="alert-dialog-title">{dialogMessage}</DialogTitle>
-            <DialogContent>
-              <DialogContentText id="alert-dialog-description">
-                {dialogDescription}
-              </DialogContentText>
-            </DialogContent>
-            <DialogActions>
-              <Button onClick={handleDialogClose}>Cancel</Button>
-              <Button onClick={deleteEntry} autoFocus>
-                Delete
-              </Button>
-            </DialogActions>
-          </Dialog>
         </Box>
       </React.Fragment>
     );

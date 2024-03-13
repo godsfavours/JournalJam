@@ -38,7 +38,7 @@ const UNSAVED_MSG =
 const TEXT_FIELD_ROW_HEIGHT = 23; /* The height (pixels) of one text area row. */
 
 const EditEntry = forwardRef(
-  ({ entries, updateEntries, selectedIndex }, ref) => {
+  ({ user, entries, updateEntries, selectedIndex }, ref) => {
     const theme = useTheme();
     const [entryContent, setEntryContent] = useState("");
     const [initialContent, setInitialContent] = useState(undefined);
@@ -341,9 +341,11 @@ const EditEntry = forwardRef(
 
     const handleGetAIPrompt = async () => {
       setLoading(true);
-
+      // console.log("USERID: ", user); ${user.id}
       try {
-        const aiPrompt = "Load AI Prompt here";
+        const res = await axios.get(`/llm/entries/7/`);
+        console.log("RESL: ", res.data);
+        const aiPrompt = res.data;
         setPrompt(aiPrompt);
         await savePrompt(aiPrompt);
       } catch (e) {

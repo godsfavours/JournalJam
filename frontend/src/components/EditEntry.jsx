@@ -40,6 +40,7 @@ const TEXT_FIELD_ROW_HEIGHT = 23; /* The height (pixels) of one text area row. *
 const EditEntry = forwardRef(
   ({ user, entries, updateEntries, selectedIndex }, ref) => {
     const theme = useTheme();
+    const [promptList, setPromptList] = useState([]);
     const [entryContent, setEntryContent] = useState("");
     const [initialContent, setInitialContent] = useState(undefined);
     const [lastSaved, setLastSaved] = useState(undefined);
@@ -341,15 +342,35 @@ const EditEntry = forwardRef(
 
     const handleGetAIPrompt = async () => {
       setLoading(true);
-      try {
-        const res = await axios.get(`/llm/entries/${user.id}/`);
-        const aiPrompt = res.data;
-        // console.log("RESL: ", res.data.response);
-        setPrompt(aiPrompt);
-        await savePrompt(aiPrompt);
-      } catch (e) {
-        /* TODO: handle errors. Use https://mui.com/material-ui/react-alert/ */
+
+      if (promptList.length > 0) {
+        const promptListCopy = promptList;
+        const aiPrompt = promptListCopy.pop();
+        setPromptList(promptListCopy);
+
+        try {
+          setPrompt(aiPrompt);
+          await savePrompt(aiPrompt);
+        } catch (e) {
+          /* TODO: handle errors. Use https://mui.com/material-ui/react-alert/ */
+        }
+      } else {
+        try {
+          await saveContent();
+          await saveTitle();
+          const res = await axios.get(`/llm/entries/${user.id}/`);
+
+          const newPromptList = res.data.prompts;
+          const newPrompt = newPromptList.pop();
+          setPromptList(newPromptList);
+          console.log("RESL: ", newPromptList);
+          setPrompt(newPrompt);
+          await savePrompt(newPrompt);
+        } catch (e) {
+          /* TODO: handle errors. Use https://mui.com/material-ui/react-alert/ */
+        }
       }
+
       setLoading(false);
     };
 

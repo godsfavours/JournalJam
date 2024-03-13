@@ -342,17 +342,30 @@ const EditEntry = forwardRef(
     const handleGetAIPrompt = async () => {
       setLoading(true);
       try {
-        const res = await axios.get(`/llm/entries/${user.id}/`);
-        console.log("RESL: ", res.data);
-        const aiPrompt = res.data;
+        // const res = await axios.get(`/llm/entries/${user.id}/`);
+        // const aiPrompt = res.data;
+        // console.log("RESL: ", res.data);
+        const aiPrompt = `AI prompting goes here- no GET request sent`;
         setPrompt(aiPrompt);
         await savePrompt(aiPrompt);
       } catch (e) {
         /* TODO: handle errors. Use https://mui.com/material-ui/react-alert/ */
       }
-      // setDialogMessage("Test Dialog");
-      // setDialogDescription(`Click Cancel `);
-      // setDialogOpen(true);
+      setLoading(false);
+    };
+
+    const handleRemoveAIPrompt = async () => {
+      setLoading(true);
+      try {
+        // post to axios to ensure this topic is not brought up again
+        // const res = await axios.get(`/llm/entries/${user.id}/`);
+        // console.log("RESL: ", res.data);
+
+        setPrompt("");
+        await savePrompt("");
+      } catch (e) {
+        /* TODO: handle errors. Use https://mui.com/material-ui/react-alert/ */
+      }
       setLoading(false);
     };
 
@@ -480,11 +493,14 @@ const EditEntry = forwardRef(
                   aria-controls="panel3-content"
                   id="panel3-header"
                 >
-                  {prompt}
+                  <Typography variant="body1" sx={{ whiteSpace: "pre-line" }}>
+                    {prompt}
+                  </Typography>
                 </AccordionSummary>
                 {/* <AccordionDetails>
-                <b>Your Daily Inspiration Prompt</b>
-              </AccordionDetails> */}
+                  {prompt}
+                  <b>Your Daily Inspiration Prompt</b>
+                </AccordionDetails> */}
                 <AccordionActions>
                   <Tooltip title={"Give me another prompt"}>
                     <IconButton
@@ -496,12 +512,13 @@ const EditEntry = forwardRef(
                       <RefreshIcon />
                     </IconButton>
                   </Tooltip>
-                  <Tooltip title={"Don't prompt me about this topic again"}>
+                  <Tooltip title={"Remove AI Prompt"}>
+                    {/* Don't prompt me about this topic again */}
                     <IconButton
                       color="primary"
                       onClick={(e) => {
                         // e.preventDefault();
-                        handleGetAIPrompt(e);
+                        handleRemoveAIPrompt(e);
                       }}
                     >
                       <CloseIcon />

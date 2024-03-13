@@ -227,23 +227,28 @@ class LLMJournalEntriesAPIView(APIView):
         entries = JournalEntry.objects.filter(user=user_id).order_by("last_updated")
         entry_serializer = JournalEntrySerializer(entries, many=True, context={'request': request})
         
+        MAX_LEN = 300 # max number of words sent to LLM
         content_list = []
+        content_len = 0
         for serialized_entry in entry_serializer.data[::-1]:
             try:
-                if len(content_list) < 3:
+                # Will keep adding content from journal entries if space left
+                # content_txt may exceed MAX_LEN
+                if content_len < MAX_LEN:
                     content = JournalEntryContent.objects.get(entry_id=serialized_entry['id'], user=request.user)
                     content_txt: str = JournalEntryContentSerializer(content).data['content']
-                    if "What's on your mind" in content_txt:
+                    # manually skip default entry
+                    if "What's on your mind?" in content_txt:
                         continue
                     else:
                         content_list.append(content_txt)
+                        content_len += len(content_txt.split())
                 else:
                     break
             except JournalEntryContent.DoesNotExist:
                 continue
         
         print("content_list: ", content_list)
-        print("Entries fetched: ", entries)
         
         # Preprocess entries
         prompt_text = JOURNAL_ENTRY_PREPEND + "\n\n".join(content_list)

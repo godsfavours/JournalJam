@@ -344,8 +344,8 @@ const EditEntry = forwardRef(
       setLoading(true);
 
       if (promptList.length > 0) {
-        const promptListCopy = promptList; //????? deep copy
-        const aiPrompt = promptListCopy.pop(); /// does pop work
+        const promptListCopy = promptList;
+        const aiPrompt = promptListCopy.pop();
         setPromptList(promptListCopy);
 
         try {
@@ -356,7 +356,7 @@ const EditEntry = forwardRef(
         }
       } else {
         try {
-          await saveContent(); // or just handleSave();
+          await saveContent();
           await saveTitle();
           const res = await axios.get(`/llm/entries/${user.id}/`);
 

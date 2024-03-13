@@ -342,10 +342,9 @@ const EditEntry = forwardRef(
     const handleGetAIPrompt = async () => {
       setLoading(true);
       try {
-        // const res = await axios.get(`/llm/entries/${user.id}/`);
-        // const aiPrompt = res.data;
-        // console.log("RESL: ", res.data);
-        const aiPrompt = `AI prompting goes here- no GET request sent`;
+        const res = await axios.get(`/llm/entries/${user.id}/`);
+        const aiPrompt = res.data;
+        // console.log("RESL: ", res.data.response);
         setPrompt(aiPrompt);
         await savePrompt(aiPrompt);
       } catch (e) {

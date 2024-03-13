@@ -224,14 +224,31 @@ class LLMJournalEntriesAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, user_id):
-        entries = JournalEntry.objects.filter(user=user_id).order_by('last_updated')[-3:]
+        entries = JournalEntry.objects.filter(user=user_id).order_by("last_updated")
+        entry_serializer = JournalEntrySerializer(entries, many=True, context={'request': request})
+        
+        content_list = []
+        for serialized_entry in entry_serializer.data[::-1]:
+            try:
+                if len(content_list) < 3:
+                    content = JournalEntryContent.objects.get(entry_id=serialized_entry['id'], user=request.user)
+                    content_txt = JournalEntryContentSerializer(content).data['content']
+                    content_list.append(content_txt)
+                else:
+                    break
+            except JournalEntryContent.DoesNotExist:
+                continue
+        
+        print("content_list: ", content_list)
+        print("Entries fetched: ", entries)
         
         # Preprocess entries
-        entries_text = JOURNAL_ENTRY_PREPEND + "\n\n".join(entry.text for entry in entries)
+        prompt_text = JOURNAL_ENTRY_PREPEND + "\n\n".join(content_list)
+        print("prompt_text: ", prompt_text)
         
         messages = [
             {"role": "system", "content": SYSTEM_PROMPT},
-            {"role": "user", "content": entries_text},
+            {"role": "user", "content": prompt_text},
         ]
         
         response = client.chat.completions.create(
@@ -240,4 +257,6 @@ class LLMJournalEntriesAPIView(APIView):
         )
         
         response_text = response.choices[0].message.content
-        return Response({"response": response_text}, status=status.HTTP_200_OK)
+        response_list = [i[3:] for i in response_text.split('\n')]
+        
+        return Response({"prompts": response_list}, status=status.HTTP_200_OK)

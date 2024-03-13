@@ -232,8 +232,11 @@ class LLMJournalEntriesAPIView(APIView):
             try:
                 if len(content_list) < 3:
                     content = JournalEntryContent.objects.get(entry_id=serialized_entry['id'], user=request.user)
-                    content_txt = JournalEntryContentSerializer(content).data['content']
-                    content_list.append(content_txt)
+                    content_txt: str = JournalEntryContentSerializer(content).data['content']
+                    if "What's on your mind" in content_txt:
+                        continue
+                    else:
+                        content_list.append(content_txt)
                 else:
                     break
             except JournalEntryContent.DoesNotExist:

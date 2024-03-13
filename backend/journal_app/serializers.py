@@ -1,6 +1,6 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
-from .models import JournalEntry, JournalEntryContent
+from .models import JournalEntry, JournalEntryContent, JournalPrompt
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -17,3 +17,8 @@ class JournalEntryContentSerializer(serializers.ModelSerializer):
     class Meta:
         model = JournalEntryContent
         fields = ['id', 'entry_id', 'user', 'content', 'last_updated']
+
+class JournalPromptSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = JournalPrompt
+        fields = ['id', 'entry_id', 'user', 'prompt']

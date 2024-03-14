@@ -343,7 +343,7 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
                   <Tooltip
                     title={`Change to ${
                       theme === "dark" ? "light" : "dark"
-                    } theme.`}
+                    } mode`}
                   >
                     {leftPanelCollapsed ? (
                       <Box

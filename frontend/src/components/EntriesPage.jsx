@@ -120,8 +120,21 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
     e?.preventDefault();
 
     const createEntry = async () => {
+      // default title ex: Wed Mar 13th, 6 PM
       const date = new Date();
-      const title = `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
+      const nthNumber = (number) => {
+        return number > 0
+          ? ["th", "st", "nd", "rd"][
+              (number > 3 && number < 21) || number % 10 > 3 ? 0 : number % 10
+            ]
+          : "";
+      };
+      const days = ['Sun', 'Mon', 'Tue','Wed','Thu','Fri','Sat'];
+      const day = date.getDate();
+      const month = date.toLocaleString("default", { month: "short" });
+      const time = date.toLocaleString('en-US', { hour: 'numeric', hour12: true });
+      const title = `${days[date.getDay()]} ${month} ${day}${nthNumber(day)}, ${time}`;
+
       try {
         let res = await axios.post(
           `/entries/`,

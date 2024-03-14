@@ -92,9 +92,8 @@ const EditEntry = forwardRef(
               ? res.data.last_updated
               : entries[selectedIndex].last_updated;
           let date = new Date(updated);
-          // `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`;
           setLastSaved(
-            `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`
+            `${date.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`
           );
 
           /* Used to prevent the user from leaving the page with unsaved changes. */
@@ -121,7 +120,7 @@ const EditEntry = forwardRef(
 
         let date = new Date(entry.last_updated);
         setLastSaved(
-          `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`
+          `${date.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`
         );
         setDirty(false);
       },
@@ -163,7 +162,9 @@ const EditEntry = forwardRef(
     };
 
     const saveTitle = async () => {
-      if (initialTitle === entryTitle) return;
+      if (initialTitle === entryTitle) {
+        return;
+      }
 
       try {
         let res = await axios.patch(
@@ -237,9 +238,8 @@ const EditEntry = forwardRef(
 
           let date = new Date(updated);
           setLastSaved(
-            `${date.toLocaleDateString()} ${date.toLocaleTimeString()}`
-          );
-
+            `${date.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`
+            );
           setDirty(false);
 
           /* Update the entry title in side bar */
@@ -445,7 +445,7 @@ const EditEntry = forwardRef(
                     handleGetAIPrompt();
                   }}
                 >
-                  Get AI Prompt
+                  New Prompt
                 </Button>
                 <IconButton
                   size="large"

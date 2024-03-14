@@ -522,7 +522,7 @@ const EditEntry = forwardRef(
                   <b>Your Daily Inspiration Prompt</b>
                 </AccordionDetails> */}
                 <AccordionActions>
-                  <Tooltip title={"Give me another prompt"}>
+                  <Tooltip title={"New Prompt"}>
                     <IconButton
                       color="primary"
                       onClick={(e) => {
@@ -532,7 +532,7 @@ const EditEntry = forwardRef(
                       <RefreshIcon />
                     </IconButton>
                   </Tooltip>
-                  <Tooltip title={"Remove AI Prompt"}>
+                  <Tooltip title={"Remove Prompt"}>
                     {/* Don't prompt me about this topic again */}
                     <IconButton
                       color="primary"

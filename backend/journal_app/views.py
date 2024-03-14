@@ -263,7 +263,6 @@ class LLMJournalEntriesAPIView(APIView):
             model=MODEL_ID,
             messages=messages
         )
-        
         response_text = response.choices[0].message.content.split('\n')
         prompts = []
         for r in response_text:

@@ -141,7 +141,7 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
           {
             user: user.id,
             title,
-            content: "What's on your mind?" /* TODO: make content optional */,
+            content: "",
             prompt: "",
           },
           {

@@ -38,7 +38,7 @@ const UNSAVED_MSG =
 const TEXT_FIELD_ROW_HEIGHT = 23; /* The height (pixels) of one text area row. */
 
 const EditEntry = forwardRef(
-  ({ user, entries, updateEntries, selectedIndex }, ref) => {
+  ({ user, entries, contents, updateEntries, updateContents, selectedIndex }, ref) => {
     const theme = useTheme();
     const [promptList, setPromptList] = useState([]);
     const [entryContent, setEntryContent] = useState("");
@@ -241,13 +241,17 @@ const EditEntry = forwardRef(
             `${date.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })}`
             );
           setDirty(false);
-
+          
           /* Update the entry title in side bar */
           let entries_clone = [...entries];
           let entry = { ...entries[selectedIndex], title: entryTitle };
           entries_clone.splice(selectedIndex, 1);
           entries_clone.unshift(entry);
           updateEntries(entries_clone);
+
+          let contents_clone = [...contents];
+          contents_clone.splice(selectedIndex, 1, entryContent);
+          updateContents(contents_clone);
 
           setSearchParams({ ...searchParams, si: 0 });
         } catch (e) {
@@ -277,6 +281,10 @@ const EditEntry = forwardRef(
         let entries_clone = [...entries];
         entries_clone.splice(selectedIndex, 1);
         updateEntries(entries_clone);
+
+        let contents_clone = [...contents];
+        contents_clone.splice(selectedIndex, 1);
+        updateContents(contents_clone);
 
         handleCloseEntry();
       } catch (e) {

@@ -327,7 +327,6 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
                         <ListItemText
                           primary={getDisplayedEntryTitle(entry?.title)}
                           secondary={getDisplayedEntryTitle(contents[i])}
-                          // secondary={getDisplayedEntryTitle(entry?.content)}
                         />
                       </ListItemButton>
                     ))

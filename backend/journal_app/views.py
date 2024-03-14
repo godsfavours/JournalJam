@@ -237,10 +237,7 @@ class LLMJournalEntriesAPIView(APIView):
                 if content_len < MAX_LEN:
                     content = JournalEntryContent.objects.get(entry_id=serialized_entry['id'], user=request.user)
                     content_txt: str = JournalEntryContentSerializer(content).data['content']
-                    # manually skip default entry
-                    if "What's on your mind?" in content_txt:
-                        continue
-                    else:
+                    if len(content_txt) > 0:
                         content_list.append(content_txt)
                         content_len += len(content_txt.split())
                 else:
@@ -248,11 +245,11 @@ class LLMJournalEntriesAPIView(APIView):
             except JournalEntryContent.DoesNotExist:
                 continue
         
-        print("content_list: ", content_list)
+        # print("content_list: ", content_list)
         
         # Preprocess entries
         prompt_text = JOURNAL_ENTRY_PREPEND + "\n\n".join(content_list)
-        print("prompt_text: ", prompt_text)
+        # print("prompt_text: ", prompt_text)
         
         messages = [
             {"role": "system", "content": SYSTEM_PROMPT},

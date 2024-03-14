@@ -35,6 +35,7 @@ const SELECTED_INDEX_KEY = "si";
 const EntriesPage = ({ user, theme, toggleTheme }) => {
   const [panelHeight, setPanelHeight] = useState(undefined);
   const [entries, setEntries] = useState([]);
+  const [contents, setContents] = useState([]);
   const [selectedIndex, setSelectedIndex] = useState(undefined);
   const [journalEntriesPanelWidthPx, setJournalEntriesPanelWidthPx] =
     useState(10);
@@ -55,13 +56,19 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
     const getEntries = async () => {
       /* Get user entries */
       try {
-        let res = await axios.get(`/entries/${user.id}/`);
+        let res = await axios.get(`/entries/${user.id}`);
 
         /* Sort entries by last updated descending */
         const entries = res.data.sort((entryA, entryB) =>
           entryA.last_updated < entryB.last_updated ? 1 : -1
         );
         setEntries(entries);
+        let new_contents = [];
+        for (let i = 0; i < entries.length; i++) {
+          let c_res = await axios.get(`api/entries/${entries[i].id}/content/`);
+          new_contents.push(c_res.data.content);
+        }
+        setContents(new_contents);
       } catch (e) {
         /* TODO: handle errors. Use https://mui.com/material-ui/react-alert/ */
       }
@@ -153,6 +160,8 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
 
         let newEntries = [res.data.entry_data].concat(entries);
         setEntries(newEntries);
+        let newContents = [res.data.content].concat(contents);
+        setContents(newContents);
         setSearchParams({
           ...searchParams,
           [SELECTED_INDEX_KEY]: 0,
@@ -317,6 +326,8 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
                       >
                         <ListItemText
                           primary={getDisplayedEntryTitle(entry?.title)}
+                          secondary={getDisplayedEntryTitle(contents[i])}
+                          // secondary={getDisplayedEntryTitle(entry?.content)}
                         />
                       </ListItemButton>
                     ))
@@ -343,7 +354,7 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
                   <Tooltip
                     title={`Change to ${
                       theme === "dark" ? "light" : "dark"
-                    } theme.`}
+                    } mode`}
                   >
                     {leftPanelCollapsed ? (
                       <Box
@@ -432,7 +443,9 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
             <>
               <EditEntry
                 entries={entries}
+                contents={contents}
                 updateEntries={setEntries}
+                updateContents={setContents}
                 selectedIndex={selectedIndex}
                 ref={editEntryContentRef}
                 user={user}

@@ -211,6 +211,11 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
     return cutOff !== title ? `${cutOff}...` : title;
   };
 
+  const onContext = (e) => {
+    e.preventDefault();
+    //want to add a context menu to delete
+  };
+
   return (
     <Box
       style={{
@@ -323,6 +328,7 @@ const EntriesPage = ({ user, theme, toggleTheme }) => {
                         key={i}
                         selected={selectedIndex === i.toString()}
                         onClick={(e) => handleJournalEntrySelected(e, i)}
+                        onContextMenu={(e) => onContext(e)}
                       >
                         <ListItemText
                           primary={getDisplayedEntryTitle(entry?.title)}

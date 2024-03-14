@@ -31,6 +31,7 @@ import DialogContentText from "@mui/material/DialogContentText";
 import DialogTitle from "@mui/material/DialogTitle";
 import RefreshIcon from "@mui/icons-material/Refresh";
 import CloseIcon from "@mui/icons-material/Close";
+import DeleteIcon from "@mui/icons-material/Delete";
 
 const MAX_TITLE_LEN = 100;
 const UNSAVED_MSG =
@@ -455,43 +456,17 @@ const EditEntry = forwardRef(
                 >
                   New Prompt
                 </Button>
-                <IconButton
-                  size="large"
-                  aria-label="More Entry Options"
-                  aria-controls="menu-journal-entry"
-                  aria-haspopup="true"
-                  onClick={handleOpenMenu}
-                  color="inherit"
-                >
-                  <MoreVertIcon />
-                </IconButton>
-                <Menu
-                  id="menu-journal-entry"
-                  anchorEl={menuAnchorEl}
-                  anchorOrigin={{
-                    vertical: "top",
-                    horizontal: "right",
-                  }}
-                  keepMounted
-                  transformOrigin={{
-                    vertical: "top",
-                    horizontal: "right",
-                  }}
-                  open={Boolean(menuAnchorEl)}
-                  onClose={handleCloseMenu}
-                >
-                  <MenuItem onClick={handleCloseEntry}>Close Entry</MenuItem>
-                  <MenuItem
-                    onClick={(e) => {
-                      e.preventDefault();
-                      handleSave(e);
-                      handleCloseMenu(e);
-                    }}
-                  >
-                    Save
-                  </MenuItem>
-                  <MenuItem onClick={handleDelete}>Delete</MenuItem>
-                </Menu>
+                <Tooltip title="Delete">
+               <IconButton aria-label="delete" onClick={handleDelete}>
+                  <DeleteIcon />
+               </IconButton>
+               </Tooltip>
+
+                <Tooltip title="Close Entry">
+                <IconButton onClick={handleCloseEntry}>
+                  <CloseIcon />
+               </IconButton>
+               </Tooltip>
               </Box>
             </Box>
 
@@ -525,10 +500,7 @@ const EditEntry = forwardRef(
                     {prompt}
                   </Typography>
                 </AccordionSummary>
-                {/* <AccordionDetails>
-                  {prompt}
-                  <b>Your Daily Inspiration Prompt</b>
-                </AccordionDetails> */}
+                
                 <AccordionActions>
                   <Tooltip title={"New Prompt"}>
                     <IconButton
@@ -541,11 +513,9 @@ const EditEntry = forwardRef(
                     </IconButton>
                   </Tooltip>
                   <Tooltip title={"Remove Prompt"}>
-                    {/* Don't prompt me about this topic again */}
                     <IconButton
                       color="primary"
                       onClick={(e) => {
-                        // e.preventDefault();
                         handleRemoveAIPrompt(e);
                       }}
                     >
@@ -562,7 +532,7 @@ const EditEntry = forwardRef(
             <Box
               component="form"
               style={{ flexGrow: 1, flexShrink: 1 }}
-              sx={{ mb: 2 }}
+              // sx={{ mb: 2 }}
             >
               <TextField
                 variant="standard"
@@ -573,6 +543,7 @@ const EditEntry = forwardRef(
                 rows={textAreaRows}
                 // maxRows={textAreaRows}
                 value={entryContent}
+                InputProps={{ disableUnderline: true }}
                 onChange={handleEntryUpdateContent}
                 placeholder="What's on your mind?"
                 autoFocus
@@ -590,26 +561,53 @@ const EditEntry = forwardRef(
                 p: 1,
                 display: "flex",
                 alignItems: "center",
-                justifyContent: "flex-start",
+                justifyContent: "space-between",
                 marginTop: "auto",
-                position: "fixed",
                 bottom: 0,
-                width: "90%",
-                height: "15%",
+                // width: "80%",
+                height: "10%",
                 zIndex: 2,
+                position: "fixed",
+
+                flexDirection: "row",
+                flexGrow: 1, 
+                flexShrink: 1, 
               }}
               sx={{
                 mt: 1,
+                // mb: 2,
                 backgroundColor:
                   theme.palette.mode === "dark" ? "#131312" : "#ffffff",
               }}
+              // style={{ 
+              //   flexGrow: 1, 
+              //   flexShrink: 1, 
+              //   flexDirection: "row", 
+              //   display: "flex", 
+              //   height: "15%"}}
+              // sx={{ mb: 2 }}
             >
-              <Typography sx={{ mr: 2 }} variant="body2">
-                {lastSaved ? `Last saved ${lastSaved}` : "Unsaved"}
-              </Typography>
-              <LoadingButton loading={saving} onClick={handleSave}>
-                Save
-              </LoadingButton>
+               
+               <Box style={{
+                flex:1,
+                p: 1,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "flex-end",
+                flexDirection: "row",
+                // marginTop: "auto",
+                bottom: 0,
+                // width: "20%",
+                height: "15%",
+                zIndex: 2,
+              }}>
+                <Typography sx={{ justifyContent: "flex-end" }} variant="body2">
+                  {lastSaved ? `Last saved ${lastSaved}` : "Unsaved"}
+                </Typography>
+                <LoadingButton sx={{ mr: 2, justifyContent: "flex-end"  }} loading={saving} onClick={handleSave}>
+                  Save
+                </LoadingButton>
+                </Box>
             </Box>
 
             <Dialog open={dialogOpen} onClose={handleDialogClose}>

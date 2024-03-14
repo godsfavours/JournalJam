@@ -11,7 +11,7 @@ class JournalEntry(models.Model):
 class JournalEntryContent(models.Model):
     entry_id = models.ForeignKey(JournalEntry, on_delete=models.CASCADE)
     user = models.ForeignKey(User, on_delete=models.CASCADE)
-    content = models.TextField()
+    content = models.TextField(blank=True)
     last_updated = models.DateTimeField(auto_now=True)
 
 class JournalPrompt(models.Model):

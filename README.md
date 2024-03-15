@@ -1,17 +1,51 @@
 # Team 37 (JournalJam)
 
 Welcome to [JournalJam](https://tinyurl.com/journallm) -- a journaling app built for CS194 Winter 2024, the Senior Project capstone class at Stanford University.
-Our project is hosted at [https://tinyurl.com/journallm](https://tinyurl.com/journallm).
+An instance of our project is hosted on a custom Ubuntu Server at [https://tinyurl.com/journallm](https://tinyurl.com/journallm).
 
 ## Project Synopsis
 
 Our innovative web application redefines daily journaling by integrating a fine-tuned Language Learning Model (LLM), providing personalized prompts and insights based on users’ previous entries. This AI-enhanced platform not only facilitates deeper reflection and consistency in journaling but implicitly features mood tracking and thematic analysis for comprehensive emotional and mental well-being monitoring. Designed with a focus on user experience and data security, this app offers an intuitive interface and secure environment, making it an essential tool for anyone seeking to enrich their self-care routine through thoughtful, AI-guided journaling.
 
-## Installation Using Docker (Recommended)
+## Installing and Running a Local Instance
 > [!IMPORTANT]
-> You should have Docker installed on the machine that you plan to host the service on.
+> Regardless of the installation method, you need to have a valid OpenAI API Key and have this key set as an environment variable under `OPENAI_API_KEY`
+>
+> Feel free to visit [OpenAI's official documentation](https://platform.openai.com/docs/quickstart?context=python) for instructions on creating an OpenAI account, creating an API key, and setting your API key as an environment variable.
+
+Please ensure that you have cloned the repository:
+```
+git clone https://github.com/StanfordCS194/Win24-Team37.git
+```
+
+And that your current-working-directory is within the the cloned repository:
+```
+cd Win24-Team37
+```
+
+### Fine-Tuning an Instance of GPT 3.5
+Prerequisites:
+ - A valid OpenAI API Key set as an environment variable under `OPENAI_API_KEY` (see "Important" note above for more details)
+ - [Python3.10.X](https://www.python.org/downloads/release/python-31011/) installed 
+ - The `jupyter` and `openai` Python packages, which you may install using `python3,10 -m pip install openai jupyter`
+
+JournalJam uses a fine-tuned instance of GPT 3.5 as its current LLM. However, because OpenAI does not support sharing fine-tuned instances of GPT between different organizational accounts, you must fine-tune your own instance of GPT 3.5 using the training data we make available in our repo. To do this, first navigate to the dataset folder: `cd dataset`
+
+From here, step through the `format_validation.ipynb` Python Notebook to ensure that the cloned instance of [fine-tuning dataset](/dataset/fine_tuning_dataset.jsonl) is properly formatted. The last cell should print out `No errors found.`
+
+Next, step through the `fine_tune.ipynb` Python Notebook to submit for a fine-tuning job of GPT 3.5 under the account that your OpenAI API Key is tied to. Once the fine-tuning job is submitted, it may take some time for an instance of GPT 3.5 to be fine-tuned. The Python Notebook will walk you through on checking the status of your fine-tuning job. Once your fine-tuning job is completed, **copy to your clipboard / note down the fine-tuned model ID**. 
+
+Finally, navigate to the [configs.py](/backend/journal_app/configs.py) file under `backend/journal_app/configs.py`, and replace the value of the `MODEL_ID` string with the fine-tuned model ID that you noted/copied earlier.
+
+:star: Congrats! You have successfully fine-tuned an instance of OpenAI's GPT 3.5 :star:
+
+
+### Installation Using Docker (Recommended)
+> [!TIP]
+> Installing using Docker  
 >
 > Please ensure that you have the [correct version of Docker installed](https://docs.docker.com/engine/install/) per your host machine's OS.
+
 
 ## TODO:
  - Add instructions for generating OpenAI key, adding key to environment variable, and finetuning model (if user wants to run through this process themselves)

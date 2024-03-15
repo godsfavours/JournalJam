@@ -8,7 +8,6 @@ An instance of our project is hosted on a custom Ubuntu Server at [https://tinyu
 ## Table of Contents
 - [Project Synopsis](#project-synopsis)
 - [Installing & Deploying a Local Instance of JournalJam](#installing--deploying-a-local-instance-of-journaljam)
-    - [Important](#installing--deploying-a-local-instance-of-journaljam)
     - [Fine-Tuning an Instance of GPT 3.5](#fine-tuning-an-instance-of-gpt-35)
     - [Option 1: Installation & Deployment Using Docker (Highly Recommended)](#option-1-installation--deployment-using-docker-highly-recommended)
     - [Option 2: Local Installation & Deployment](#option-2-local-installation--deployment)

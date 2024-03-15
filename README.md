@@ -131,7 +131,7 @@ By default, the backend will listen to API calls on port 8000 (which is where th
 
 #### Deploying the Frontend:
 
-Without closing out of shell running the frontend deployment, open up a new shell. 
+Without closing out of shell running the backend deployment, open up a new shell. 
 
 First, navigate to the folder where you cloned the Github repo and ensure that your current-working-directory is within the `Win24-Team37` folder. To ensure you're in the right place, make sure that you get something along the lines of the following output when running the `ls` command:
 ```

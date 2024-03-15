@@ -37,7 +37,10 @@ cd Win24-Team37
 ```
 
 ### Fine-Tuning an Instance of GPT 3.5
-Prerequisites:
+
+JournalJam uses a fine-tuned instance of GPT 3.5 as its current LLM. However, because OpenAI does not support sharing fine-tuned instances of GPT between different organizational accounts, you must fine-tune your own instance of GPT 3.5 using the training data we make available in our repo.
+
+**Prerequisites**:
  - A valid OpenAI API Key set as an environment variable under `OPENAI_API_KEY` (see "Important" note above for more details)
  - [Python3.10.X](https://www.python.org/downloads/release/python-31011/) installed 
  - The `jupyter` and `openai` Python packages, which you may install using:
@@ -45,7 +48,7 @@ Prerequisites:
  python3.10 -m pip install openai jupyter
  ```
 
-JournalJam uses a fine-tuned instance of GPT 3.5 as its current LLM. However, because OpenAI does not support sharing fine-tuned instances of GPT between different organizational accounts, you must fine-tune your own instance of GPT 3.5 using the training data we make available in our repo. To do this, first navigate to the dataset folder: 
+ To do this, first navigate to the dataset folder: 
 ```
 cd dataset
 ```
@@ -63,7 +66,7 @@ Finally, navigate to the [configs.py](/backend/journal_app/configs.py) file unde
 > [!TIP]
 > Docker streamlines the installation and deployment of JournalJam on a local instance, significantly reducing setup efforts for both backend and frontend, while eliminating version mismatches and missing dependencies in your development environment.
 
-Prerequisites:
+**Prerequisites**:
  - Docker (please ensure that you have the [correct version of Docker installed](https://docs.docker.com/engine/install/) per your host machine's OS.)
  - Make sure that you followed the above steps for [fine-tuning an instance of GPT 3.5](#fine-tuning-an-instance-of-gpt-35)
 
@@ -79,7 +82,7 @@ Next, run the following command to automatically build one Docker image for the 
 docker-compose up
 ```
 
-Optionally, you can run it with the `-d` flag (i.e. `docker-compose up -d`) to ensure that the containers persist after you exit out of the shell. however, this is not recommended for the first time you build the Docker images so that you can view the status of the image-building in real-time without having to view logs. 
+Optionally, you can run it with the `-d` flag (i.e. `docker-compose up -d`) to ensure that the containers persist after you exit out of the shell. However, this is not recommended for the first time you build the Docker images so that you can view the status of the image-building in real-time without having to view logs. 
 
 Once the Docker containers are successfully spawned, you may navigate to your local instance of JournalJam at [http://localhost:3000](http://localhost:3000)
 
@@ -87,7 +90,7 @@ Once the Docker containers are successfully spawned, you may navigate to your lo
 > [!TIP]
 > Ensure that you are aware of how to simultaneously open and run multiple terminal windows/shells on your OS!
 
-Prerequisites:
+**Prerequisites**:
  - [Python3.10.X](https://www.python.org/downloads/release/python-31011/) installed
  - Make sure that you followed the above steps for [fine-tuning an instance of GPT 3.5](#fine-tuning-an-instance-of-gpt-35)
  - Valid versions of `node` and `npm` installed. You may validate this by running `node -v` and `npm -v`. If you encounter any errors in either of these commands, then [please ensure that you have both installed](https://docs.npmjs.com/downloading-and-installing-node-js-and-npm).

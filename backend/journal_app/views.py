@@ -193,12 +193,9 @@ class CreateUserAPIView(APIView):
 
 class GetUserAPIView(APIView):
     def get(self, request, user_id):
-        try:
-            user = User.objects.get(id=user_id)
-            serializer = UserSerializer(user)
-            return Response(serializer.data)
-        except User.DoesNotExist:
-            return Response({'detail': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+        user = get_object_or_404(User, id=user_id)
+        serializer = UserSerializer(user)
+        return Response(serializer.data)
 
 class CurrentUserAPIView(APIView):
     def get(self, request):
@@ -254,11 +251,7 @@ class LLMJournalEntriesAPIView(APIView):
             except JournalEntryContent.DoesNotExist:
                 continue
         
-        # print("content_list: ", content_list)
-        
-        # Preprocess entries
         prompt_text = JOURNAL_ENTRY_PREPEND + "\n\n".join(content_list)
-        # print("prompt_text: ", prompt_text)
         
         messages = [
             {"role": "system", "content": SYSTEM_PROMPT},

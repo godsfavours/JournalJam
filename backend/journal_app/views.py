@@ -198,13 +198,11 @@ class GetUserAPIView(APIView):
         return Response(serializer.data)
 
 class CurrentUserAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request):
-        user = request.user
-        if user and user.id is not None:
-            serializer = UserSerializer(user)
-            return Response(serializer.data, status=status.HTTP_200_OK)
-        else:
-            return Response({'detail': 'No user is currently logged in'}, status=status.HTTP_404_NOT_FOUND)
+        serializer = UserSerializer(request.user)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 class LoginAPIView(APIView):
     def post(self, request):

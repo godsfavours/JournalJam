@@ -1,16 +1,19 @@
-from django.db.models import Prefetch
-from .models import JournalEntry, JournalEntryContent, JournalPrompt
-from django.shortcuts import get_object_or_404
+# Related third-party imports
 from django.contrib.auth import authenticate, login, logout
-from .forms import SignupForm
-from rest_framework.views import APIView
-from rest_framework.response import Response
-from rest_framework.permissions import IsAuthenticated
-from rest_framework import status
 from django.contrib.auth.models import User
-from .serializers import UserSerializer, JournalEntrySerializer, JournalEntryContentSerializer, JournalPromptSerializer
+from django.shortcuts import get_object_or_404
+from rest_framework import status
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from rest_framework.views import APIView
+
+# Local application/library specific imports
+from .configs import JOURNAL_ENTRY_PREPEND, MAX_LEN, MODEL_ID, SYSTEM_PROMPT
+from .forms import SignupForm
 from .llm import client
-from .configs import SYSTEM_PROMPT, JOURNAL_ENTRY_PREPEND, MODEL_ID, MAX_LEN
+from .models import JournalEntry, JournalEntryContent, JournalPrompt
+from .serializers import (JournalEntryContentSerializer, JournalEntrySerializer,
+                          JournalPromptSerializer, UserSerializer)
 
 # Create your views here.
 

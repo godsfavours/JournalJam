@@ -76,22 +76,22 @@ class JournalEntryDetailAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, entry_id):
-        entry = JournalEntry.objects.get(pk=entry_id)
+        entry = get_object_or_404(JournalEntry, pk=entry_id)
         serializer = JournalEntrySerializer(entry)
         return Response(serializer.data)
 
     def delete(self, request, entry_id):
-        entry = JournalEntry.objects.get(pk=entry_id)
-        entry_content = JournalEntryContent.objects.filter(entry_id=entry_id, user=request.user).first()
+        entry = get_object_or_404(JournalEntry, pk=entry_id, user=request.user)
+        entry_content = JournalEntryContent.objects.filter(entry=entry, user=request.user).first()
 
         if entry_content:
             entry_content.delete()
-
         entry.delete()
+
         return Response({'detail': 'Journal entry and content deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
 
     def put(self, request, entry_id):
-        entry = JournalEntry.objects.get(id=entry_id)
+        entry = get_object_or_404(JournalEntry, id=entry_id, user=request.user)
         serializer = JournalEntrySerializer(entry, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -99,7 +99,7 @@ class JournalEntryDetailAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def patch(self, request, entry_id):
-        entry = JournalEntry.objects.get(id=entry_id)
+        entry = get_object_or_404(JournalEntry, id=entry_id, user=request.user)
         serializer = JournalEntrySerializer(entry, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()

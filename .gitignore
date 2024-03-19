@@ -1,4 +1,5 @@
 .venv
 *.pyc
 *.DS_Store
+*.sqlite3
 backend/db.sqlite3

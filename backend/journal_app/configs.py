@@ -4,3 +4,4 @@ SYSTEM_PROMPT = """You are an assistant geared towards helping users overcome wr
                    to help the user with writing their next journal entry. If no journal entries are given, then you are to ask present six questions (and only the questions) to help a user get started."""
                    
 JOURNAL_ENTRY_PREPEND = "Here are previous journal entries from a user:\n"
+MAX_LEN = 300

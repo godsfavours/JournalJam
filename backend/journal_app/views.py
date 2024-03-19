@@ -1,3 +1,4 @@
+from django.db.models import Prefetch
 from .models import JournalEntry, JournalEntryContent, JournalPrompt
 from django.shortcuts import get_object_or_404
 from django.contrib.auth import authenticate, login, logout
@@ -9,7 +10,7 @@ from rest_framework import status
 from django.contrib.auth.models import User
 from .serializers import UserSerializer, JournalEntrySerializer, JournalEntryContentSerializer, JournalPromptSerializer
 from .llm import client
-from .configs import SYSTEM_PROMPT, JOURNAL_ENTRY_PREPEND, MODEL_ID
+from .configs import SYSTEM_PROMPT, JOURNAL_ENTRY_PREPEND, MODEL_ID, MAX_LEN
 
 # Create your views here.
 
@@ -216,6 +217,7 @@ class LoginAPIView(APIView):
             return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response({'detail': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+        
 
 class LogoutAPIView(APIView):
     def post(self, request):
@@ -223,7 +225,6 @@ class LogoutAPIView(APIView):
         return Response({'detail': 'Logout successful'}, status=status.HTTP_200_OK)
     
     
-
 class LLMJournalEntriesAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
@@ -231,41 +232,36 @@ class LLMJournalEntriesAPIView(APIView):
         entries = JournalEntry.objects.filter(user=user_id).order_by("last_updated")
         entry_serializer = JournalEntrySerializer(entries, many=True, context={'request': request})
         
-        MAX_LEN = 300 # max number of words sent to LLM
-        content_list = []
-        content_len = 0
+        content_list, content_len = [], 0
+
         for serialized_entry in entry_serializer.data[::-1]:
-            try:
-                # Will keep adding content from journal entries if space left
-                # content_txt may exceed MAX_LEN
-                if content_len < MAX_LEN:
-                    content = JournalEntryContent.objects.get(entry_id=serialized_entry['id'], user=request.user)
-                    content_txt: str = JournalEntryContentSerializer(content).data['content']
-                    if len(content_txt) > 0:
-                        content_list.append(content_txt)
-                        content_len += len(content_txt.split())
-                else:
-                    break
-            except JournalEntryContent.DoesNotExist:
-                continue
+            content = JournalEntryContent.objects.get(entry_id=serialized_entry['id'], user=request.user)
+            content_txt: str = JournalEntryContentSerializer(content).data['content']
+            if content_len < MAX_LEN and len(content_txt) > 0:
+                content_list.append(content_txt)
+                content_len += len(content_txt.split())
+            if content_len >= MAX_LEN:
+                break
         
         prompt_text = JOURNAL_ENTRY_PREPEND + "\n\n".join(content_list)
         
+        # Assume 'client' setup to communicate with LLM and handle its response.
+        response = self.query_llm(prompt_text)
+        prompts = self.process_response(response)
+        
+        return Response({"prompts": prompts}, status=status.HTTP_200_OK)
+
+    def query_llm(self, prompt_text):
         messages = [
             {"role": "system", "content": SYSTEM_PROMPT},
             {"role": "user", "content": prompt_text},
         ]
         
-        response = client.chat.completions.create(
+        return client.chat.completions.create(
             model=MODEL_ID,
             messages=messages
         )
+
+    def process_response(self, response):
         response_text = response.choices[0].message.content.split('\n')
-        prompts = []
-        for r in response_text:
-            if len(r) > 4:
-                if (r[0].isnumeric()):
-                    prompts.append(r[3:])
-                else:
-                    prompts.append(r)
-        return Response({"prompts": prompts}, status=status.HTTP_200_OK)
+        return [r[3:] if r[0].isnumeric() else r for r in response_text if len(r) > 4]

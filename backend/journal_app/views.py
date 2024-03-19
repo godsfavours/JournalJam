@@ -1,9 +1,7 @@
-from django.shortcuts import render, redirect, get_object_or_404
 from .models import JournalEntry, JournalEntryContent, JournalPrompt
+from django.shortcuts import get_object_or_404
 from django.contrib.auth import authenticate, login, logout
-from django.contrib.auth.decorators import login_required
-from .forms import UserCreationForm, LoginForm, SignupForm
-from django.contrib import messages
+from .forms import SignupForm
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from rest_framework.permissions import IsAuthenticated
@@ -16,48 +14,63 @@ from .configs import SYSTEM_PROMPT, JOURNAL_ENTRY_PREPEND, MODEL_ID
 # Create your views here.
 
 class JournalEntriesByUserAPIView(APIView):
+    permission_classes = [IsAuthenticated]
+
     def get(self, request, user_id):
-        entries = JournalEntry.objects.filter(user=user_id)
+        # Check if the requested user exists and get the user instance
+        user = get_object_or_404(User, pk=user_id)
+
+        # Check if the requesting user has permission to view the requested user's entries
+        if request.user != user and not request.user.is_staff:
+            return Response({'detail': 'You do not have permission to view these journal entries.'},
+                            status=status.HTTP_403_FORBIDDEN)
+
+        entries = JournalEntry.objects.filter(user=user)
         serializer = JournalEntrySerializer(entries, many=True, context={'request': request})
-        data = serializer.data
-        return Response(data)
+        
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
 
 class CreateJournalEntryAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def post(self, request):
-        entry_serializer = JournalEntrySerializer(data=request.data)
-        if entry_serializer.is_valid():
-            entry_instance = entry_serializer.save(user=request.user)
-            entry_id = entry_instance.id
-            request_data = request.data
-            request_data['entry_id'] = entry_id
-            # for journal entry content
-            content_serializer = JournalEntryContentSerializer(data = request_data, context={'entry': entry_instance})
-            if content_serializer.is_valid():
-                content_serializer.save(user=request.user)
-                data = {
-                    'entry_data': entry_serializer.data,
-                    'content_data': content_serializer.data
-                }
-
-                # for journal prompts
-                prompt_serializer = JournalPromptSerializer(data = request_data, context={'entry': entry_instance})
-                if prompt_serializer.is_valid():
-                    prompt_serializer.save(user=request.user)
-                    data = {
-                        'entry_data': entry_serializer.data,
-                        'content_data': content_serializer.data,
-                        'prompt_data': prompt_serializer.data
-                    }
-                    return Response(data, status=status.HTTP_201_CREATED)
-                else:
-                    print("errors: ", prompt_serializer.errors)
-                    return Response(prompt_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-            else:
-                return Response(content_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        else:
+        entry_serializer = self.get_serializer(JournalEntrySerializer, request.data)
+        if not entry_serializer:
             return Response(entry_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        entry_instance = entry_serializer.save(user=request.user)
+        request_data = self.update_request_data_with_entry_id(request.data, entry_instance.id)
+
+        content_serializer = self.get_serializer(JournalEntryContentSerializer, request_data, entry_instance)
+        if not content_serializer:
+            return Response(content_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        prompt_serializer = self.get_serializer(JournalPromptSerializer, request_data, entry_instance)
+        if not prompt_serializer:
+            return Response(prompt_serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+        data = {
+            'entry_data': entry_serializer.data,
+            'content_data': content_serializer.data,
+            'prompt_data': prompt_serializer.data
+        }
+        return Response(data, status=status.HTTP_201_CREATED)
+
+    def get_serializer(self, serializer_class, data, entry_instance=None):
+        context = {'entry': entry_instance} if entry_instance else {}
+        serializer = serializer_class(data=data, context=context)
+        if serializer.is_valid():
+            serializer.save(user=self.request.user)
+            return serializer
+        else:
+            print("errors: ", serializer.errors)
+            return None
+
+    def update_request_data_with_entry_id(self, data, entry_id):
+        data = data.copy()  # Create a mutable copy of the request data
+        data['entry_id'] = entry_id
+        return data
         
 class JournalEntryDetailAPIView(APIView):
     permission_classes = [IsAuthenticated]
@@ -92,6 +105,7 @@ class JournalEntryDetailAPIView(APIView):
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
 
 class JournalEntryContentDetailAPIView(APIView):
     permission_classes = [IsAuthenticated]

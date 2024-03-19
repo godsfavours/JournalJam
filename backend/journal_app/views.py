@@ -175,20 +175,21 @@ class JournalPromptAPIView(APIView):
 
 class CreateUserAPIView(APIView):
     def post(self, request):
-        form = SignupForm(request.data)  # Replace with your actual form or serializer
+        form = SignupForm(request.data)
         if form.is_valid():
-            username = form.cleaned_data['username']
-            password = form.cleaned_data['password1']
-            form.save()
-            user = authenticate(request, username=username, password=password)
+            user = form.save()
+            username = form.cleaned_data.get('username')
+            password = form.cleaned_data.get('password1')
 
-            if user:
-                login(request, user)
-                return Response(status=status.HTTP_201_CREATED)
+            # Directly authenticate and log in the newly created user
+            auth_user = authenticate(username=username, password=password)
+            if auth_user is not None:
+                login(request, auth_user)
+                return Response({'detail': 'User created successfully.'}, status=status.HTTP_201_CREATED)
             else:
-                return Response({'detail': 'Authentication failed'}, status=status.HTTP_401_UNAUTHORIZED)
+                return Response({'detail': 'Authentication failed unexpectedly.'}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
         else:
-            return Response({'detail': 'Invalid signup data'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(form.errors, status=status.HTTP_400_BAD_REQUEST)
 
 class GetUserAPIView(APIView):
     def get(self, request, user_id):

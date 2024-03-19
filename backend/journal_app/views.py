@@ -76,22 +76,22 @@ class JournalEntryDetailAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request, entry_id):
-        entry = get_object_or_404(JournalEntry, pk=entry_id)
+        entry = JournalEntry.objects.get(pk=entry_id)
         serializer = JournalEntrySerializer(entry)
         return Response(serializer.data)
 
     def delete(self, request, entry_id):
-        entry = get_object_or_404(JournalEntry, pk=entry_id, user=request.user)
-        entry_content = JournalEntryContent.objects.filter(entry=entry, user=request.user).first()
+        entry = JournalEntry.objects.get(pk=entry_id)
+        entry_content = JournalEntryContent.objects.filter(entry_id=entry_id, user=request.user).first()
 
         if entry_content:
             entry_content.delete()
-        entry.delete()
 
+        entry.delete()
         return Response({'detail': 'Journal entry and content deleted successfully'}, status=status.HTTP_204_NO_CONTENT)
 
     def put(self, request, entry_id):
-        entry = get_object_or_404(JournalEntry, id=entry_id, user=request.user)
+        entry = JournalEntry.objects.get(id=entry_id)
         serializer = JournalEntrySerializer(entry, data=request.data)
         if serializer.is_valid():
             serializer.save()
@@ -99,7 +99,7 @@ class JournalEntryDetailAPIView(APIView):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def patch(self, request, entry_id):
-        entry = get_object_or_404(JournalEntry, id=entry_id, user=request.user)
+        entry = JournalEntry.objects.get(id=entry_id)
         serializer = JournalEntrySerializer(entry, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -110,37 +110,33 @@ class JournalEntryDetailAPIView(APIView):
 class JournalEntryContentDetailAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
+    def get_object(self, entry_id):
+        """
+        Helper method to get the object and handle object not found error.
+        """
+        return get_object_or_404(JournalEntryContent, entry_id=entry_id, user=self.request.user)
+
     def get(self, request, entry_id):
-        try:
-            content = JournalEntryContent.objects.get(entry_id=entry_id, user=request.user)
-            serializer = JournalEntryContentSerializer(content)
+        content = self.get_object(entry_id)
+        serializer = JournalEntryContentSerializer(content)
+        return Response(serializer.data)
+
+    def update(self, request, entry_id, partial=False):
+        """
+        Handle update operations for PUT and PATCH methods.
+        """
+        content = self.get_object(entry_id)
+        serializer = JournalEntryContentSerializer(content, data=request.data, partial=partial)
+        if serializer.is_valid():
+            serializer.save()
             return Response(serializer.data)
-        except JournalEntryContent.DoesNotExist:
-            return Response({'detail': 'Journal entry content not found'}, status=status.HTTP_404_NOT_FOUND)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, entry_id):
-        try:
-            content = JournalEntryContent.objects.get(entry_id=entry_id, user=request.user)
-            request_data = request.data
-            request_data['entry_id'] = entry_id
-            serializer = JournalEntryContentSerializer(content, data=request_data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except JournalEntryContent.DoesNotExist:
-            return Response({'detail': 'Journal entry content not found'}, status=status.HTTP_404_NOT_FOUND)
+        return self.update(request, entry_id, partial=False)
 
     def patch(self, request, entry_id):
-        try:
-            content = JournalEntryContent.objects.get(entry_id=entry_id, user=request.user)
-            serializer = JournalEntryContentSerializer(content, data=request.data, partial=True)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except JournalEntryContent.DoesNotExist:
-            return Response({'detail': 'Journal entry content not found'}, status=status.HTTP_404_NOT_FOUND)
+        return self.update(request, entry_id, partial=True)
     
     
 class JournalPromptAPIView(APIView): 

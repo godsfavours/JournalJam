@@ -139,40 +139,38 @@ class JournalEntryContentDetailAPIView(APIView):
         return self.update(request, entry_id, partial=True)
     
     
-class JournalPromptAPIView(APIView): 
+class JournalPromptAPIView(APIView):
     permission_classes = [IsAuthenticated]
 
+    def get_object(self, entry_id):
+        """
+        Helper method to retrieve the journal prompt object, ensuring it belongs to the
+        request's user. Automatically raises a 404 error if not found.
+        """
+        return get_object_or_404(JournalPrompt, entry_id=entry_id, user=self.request.user)
+
     def get(self, request, entry_id):
-        try:
-            content = JournalPrompt.objects.get(entry_id=entry_id, user=request.user)
-            serializer = JournalPromptSerializer(content)
+        prompt = self.get_object(entry_id)
+        serializer = JournalPromptSerializer(prompt)
+        return Response(serializer.data)
+
+    def update(self, request, entry_id, partial=False):
+        """
+        A unified method to handle both PUT and PATCH requests.
+        """
+        prompt = self.get_object(entry_id)
+        serializer = JournalPromptSerializer(prompt, data=request.data, partial=partial)
+        if serializer.is_valid():
+            serializer.save()
             return Response(serializer.data)
-        except JournalPrompt.DoesNotExist:
-            return Response({'detail': 'Journal prompt not found'}, status=status.HTTP_404_NOT_FOUND)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
     def put(self, request, entry_id):
-        try:
-            content = JournalPrompt.objects.get(entry_id=entry_id, user=request.user)
-            request_data = request.data
-            request_data['entry_id'] = entry_id
-            serializer = JournalPromptSerializer(content, data=request_data)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except JournalPrompt.DoesNotExist:
-            return Response({'detail': 'Journal prompt not found'}, status=status.HTTP_404_NOT_FOUND)
+        return self.update(request, entry_id, partial=False)
 
     def patch(self, request, entry_id):
-        try:
-            content = JournalPrompt.objects.get(entry_id=entry_id, user=request.user)
-            serializer = JournalPromptSerializer(content, data=request.data, partial=True)
-            if serializer.is_valid():
-                serializer.save()
-                return Response(serializer.data)
-            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-        except JournalPrompt.DoesNotExist:
-            return Response({'detail': 'Journal prompt not found'}, status=status.HTTP_404_NOT_FOUND)
+        return self.update(request, entry_id, partial=True)
         
 
 class CreateUserAPIView(APIView):

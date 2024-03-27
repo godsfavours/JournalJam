@@ -1,4 +1,4 @@
-# Team 37 (JournalJam)
+# JournalJam
 
 Welcome to [JournalJam](https://tinyurl.com/journallm) -- a journaling app built for CS194 Winter 2024, the Senior Project capstone class at Stanford University.
 
@@ -31,12 +31,12 @@ Our innovative web application redefines daily journaling by integrating a fine-
 
 Please ensure that you have cloned the repository:
 ```
-git clone https://github.com/StanfordCS194/Win24-Team37.git
+git clone https://github.com/godsfavours/JournalJam.git
 ```
 
 And that your current-working-directory is within the the cloned repository:
 ```
-cd Win24-Team37
+cd JournalJam
 ```
 
 ### Fine-Tuning an Instance of GPT 3.5
@@ -103,9 +103,9 @@ Once the Docker containers are successfully spawned, you may navigate to your lo
 
 First, please ensure that your current-working-directory is within the `Win24-Team37`. To ensure you're in the right place, make sure that you get something along the lines of the following output when running the `ls` command:
 ```
-ashley_git_assignment  docker-compose.yml   frontend/                  package.json       team_member_images/
-backend/               Dockerfile.backend   godsfavour_git_assignment  package-lock.json
-dataset/               Dockerfile.frontend  janice_git_assignment      README.md
+docker-compose.yml     frontend/              package.json 
+backend/               Dockerfile.backend     package-lock.json
+dataset/               Dockerfile.frontend    README.md
 ```
 
 Next, you will want to navigate to the [backend folder](/backend/) by running:

@@ -1,9 +1,13 @@
 # Team 37 (JournalJam)
 
 Welcome to [JournalJam](https://tinyurl.com/journallm) -- a journaling app built for CS194 Winter 2024, the Senior Project capstone class at Stanford University.
-An instance of our project is hosted on a custom Ubuntu Server at [https://tinyurl.com/journallm](https://tinyurl.com/journallm).
 
-:star: [About The Team](https://github.com/StanfordCS194/Win24-Team37/wiki) :star:
+## The Team
+- [Godsfavour Simon](https://github.com/godsfavours)
+- [Mohamed Owda](https://github.com/internationalmo)
+- [Ashley Chen](https://github.com/chenashley998)
+- [Ashish Thakur](https://github.com/AshishT1122)
+- [Janice Yang](https://github.com/janicehy)
 
 ## Table of Contents
 - [Project Synopsis](#project-synopsis)

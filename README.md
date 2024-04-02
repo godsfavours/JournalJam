@@ -1,6 +1,6 @@
 # JournalJam
 
-Welcome to [JournalJam](https://tinyurl.com/journallm) -- a journaling app built for CS194 Winter 2024, the Senior Project capstone class at Stanford University.
+Welcome to JournalJam -- a journaling app built for CS194 Winter 2024, the Senior Project capstone class at Stanford University.
 
 ## The Team
 - [Godsfavour Simon](https://github.com/godsfavours)

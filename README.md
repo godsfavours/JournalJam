@@ -75,9 +75,9 @@ Finally, navigate to the [configs.py](/backend/journal_app/configs.py) file unde
 
 First, please ensure that your current-working-directory is within the `Win24-Team37`. To ensure you're in the right place, make sure that you get something along the lines of the following output when running the `ls` command:
 ```
-ashley_git_assignment  docker-compose.yml   frontend/                  package.json       team_member_images/
-backend/               Dockerfile.backend   godsfavour_git_assignment  package-lock.json
-dataset/               Dockerfile.frontend  janice_git_assignment      README.md
+docker-compose.yml     frontend/            package.json 
+backend/               Dockerfile.backend   package-lock.json
+dataset/               Dockerfile.frontend  README.md
 ```
 
 Next, run the following command to automatically build one Docker image for the frontend, one Docker image for the backend, spawn containers for each image, and ensure proper port-forwarding between the frontend and backend:
@@ -138,7 +138,7 @@ Without closing out of shell running the backend deployment, open up a new shell
 
 First, navigate to the folder where you cloned the Github repo and ensure that your current-working-directory is within the `Win24-Team37` folder. To ensure you're in the right place, make sure that you get something along the lines of the following output when running the `ls` command:
 ```
-docker-compose.yml     frontend/            package.json        team_member_images/
+docker-compose.yml     frontend/            package.json   
 backend/               Dockerfile.backend   package-lock.json
 dataset/               Dockerfile.frontend  README.md
 ```
